@@ -141,6 +141,9 @@ mod_dataloader_server <- function(id){
   })
 }
 
+
+
+
 ## To be copied in the UI
 # mod_dataloader_ui("dataloader_1")
 
