@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# wwda
+# Rescience - Setting up for Reproducible Science
 
 <!-- badges: start -->
 
@@ -9,16 +9,18 @@
 experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 <!-- badges: end -->
 
-The goal of wwda is to …
+The goal of rescience is to provide an easy framework to test different
+preprocessing and machine learning methods while minimizing the risk of
+overfitting.
 
 ## Installation
 
-You can install the development version of wwda from
-[GitHub](https://github.com/) with:
+You can install the development version of rescience from
+[GitHub](https://github.com/JohanLassen/rescience) with:
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("AdvancedR-2021/Sterology")
+devtools::install_github("JohanLassen/rescience")
 ```
 
 ## Example
@@ -26,12 +28,45 @@ devtools::install_github("AdvancedR-2021/Sterology")
 This is a basic example which shows you how to solve a common problem:
 
 ``` r
-library(wwda)
-## basic example code
+library(rescience)
+
+# dataset
+pneumonia <- data(pneumonia)
+#> Warning in data(pneumonia): data set 'pneumonia' not found
+#head(pneumonia)
 ```
 
-What is special about using `README.Rmd` instead of just `README.md`?
-You can include R chunks like so:
+To statistically analyze this data it must undergo (1) selection of
+important variables including outcome, batch, and technical replicates,
+(2) preprocessing to ensure that all features and compounds are within
+the same range of values and to minimize batch effect, (3) perform a
+machine learning model screening to evaluate which model fits the data
+best.
+
+Point 2 and 3 requires the analyst to be careful, read more here.
+
+# The simple way to do it
+
+The package is accompanied with a web app that ensures that a broad
+range of users can confidently use the methods. The app exists as an
+online version to show case the setup, but we recommend users to install
+R, Rstudio, and this package to experience the best performance.
+
+To run the app:
+
+``` r
+#run_app()
+```
+
+# Diving deeper
+
+The true beauty of the package reveals itself when developing custom
+scripts and implementing your own functions.
+
+We strive to include as many different methods as possible to
+accommodate methodological studies on batch effect, machine learning
+algorithms, and model interpretation. Hence, it should be as easy as
+possible to contribute to the package by writing functions that fits the
 
 ``` r
 summary(cars)

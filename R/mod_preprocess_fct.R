@@ -665,7 +665,6 @@ standardize_z_batch <- function(ms, batch_column = "BATCH") {
 #'
 #' @examples
 plot_pca <- function(ms, color_labels=c("AGE_YEARS", "BATCH")) {
-  print(ms)
   tmp1 <- ms$rowinfo
   tmp2 <- ms$values
   r  <- prcomp(x = tmp2, retx = TRUE, center = T, scale = T, rank. = 12)
