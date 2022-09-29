@@ -39,11 +39,6 @@ mod_dataloader_ui <- function(id){
           ""
         ),
 
-        h5(
-          "If your data contains technical replicates you want to select the column describing their sample id.
-        The cross validation methods used in machine learning needs to put all technical replicates of one sample in the hold-out
-        partion to avoid information leaking from training data to test data, causing overfitting"),
-
         numericInput(
           NS(id, "start_col"), "Features' start column", value = 1, min = 1),
 
