@@ -10,7 +10,7 @@
 mod_dataloader_ui <- function(id){
   ns <- NS(id)
   tagList(
-    titlePanel("Upload data and prime for data analysis"),
+    titlePanel("Upload data"),
     sidebarLayout(
       sidebarPanel(
         #h5("Select the input file (csv or tsv)"),

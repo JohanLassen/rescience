@@ -17,7 +17,7 @@ mod_machine_learning_ui <- function(id){
                     c("Elastic Net", "Random Forest(RF)", "Gradient Boosting(GB)", "PLS(-DA)", "SVM"),  #  "OPLS(-DA)",
                     selected = "Elastic Net", multiple=T),
         actionButton(NS(id, "model2"), "Start training! (RF and GB might take +10 min to train)"),
-        br(),
+        h5(""),
         actionButton(NS(id, "preprocess"), "Show the screening result (must only be done once per dataset)")
 
       ),

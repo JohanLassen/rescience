@@ -1,5 +1,5 @@
-Package: wwda
-Title: wwda
+Package: rescience
+Title: Reprocucible Science
 Version: 0.0.0.9000
 Authors@R: person('Johan', 'Lassen', email = 'johanlassen@live.dk', role = c('cre', 'aut'))
 Description: Empowering researchers to perform and learn machine learning methods

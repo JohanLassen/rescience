@@ -14,10 +14,10 @@ app_ui <- function(request) {
       "Reproducible Data Science",
       theme = bslib::bs_theme(bootswatch = "cosmo"),
       tabPanel("Data", mod_dataloader_ui("dataloader_1")),
-      tabPanel("Preproces", mod_preprocess_ui("preprocess_1")),
+      tabPanel("Preprocess", mod_preprocess_ui("preprocess_1")),
       tabPanel("Machine Learning", mod_machine_learning_ui("machine_learning_1")),
       tabPanel("Interpretation", "To be implemented!"),
-      tabPanel("Want (O)PLS?", "Get outta here!")
+      tabPanel("PLS?", "Get outta here!")
       )
     )
 }
