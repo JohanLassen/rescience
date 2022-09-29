@@ -2,15 +2,22 @@
 output: github_document
 ---
 
+
+
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
 ```{r, include = FALSE}
+library(knitr)
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
   fig.path = "man/figures/README-",
   out.width = "100%"
 )
+
+
+ggplot2::theme_set(ggplot2::theme_classic())
+
 ```
 
 # Rescience - Setting up for Reproducible Science 
@@ -35,10 +42,13 @@ devtools::install_github("JohanLassen/rescience")
 This is a basic example which shows you how to solve a common problem:
 
 ```{r example}
+
 library(rescience)
+library(tidyverse)
 
 # dataset
-head(pneumonia)
+head(pneumonia[,1:10])
+
 ```
 
 To statistically analyze this data it must undergo (1) selection of important variables including outcome, batch, and technical replicates, (2) preprocessing to ensure that all features and compounds are within the same range of values and to minimize batch effect, (3) perform a machine learning model screening to evaluate which model fits the data best.
@@ -57,18 +67,68 @@ To run the app:
 # Diving deeper
 The true beauty of the package reveals itself when developing custom scripts and implementing your own functions. 
 
-We strive to include as many different methods as possible to accommodate methodological studies on batch effect, machine learning algorithms, and model interpretation. Hence, it should be as easy as possible to contribute to the package by writing functions that fits the 
+We strive to include as many different methods as possible to accommodate methodological studies on batch effect, machine learning algorithms, and model interpretation. Hence, it should be as easy as possible to contribute to the package by writing functions that fits the required data format.
 
-```{r cars}
-summary(cars)
+For consistency we format data into a R list called ms. The ms list contain the feature values (ms$values) and sample meta data (ms$rowinfo).
+
+# (1) Loading data
+
+In the example of pneumonia we generate the ms the following way:
+
+```{r}
+
+# First convert the pneumonia object to a tibble. 
+pneumonia <- tibble(pneumonia)
+
+# Generate list object
+ms <- list()
+
+# Assign feature values to ms$values
+start_column <- 8 # The first column with feature values
+end_column <- ncol(pneumonia) # The last column of the dataset
+ms$values <- pneumonia[, start_column:end_column]
+
+# Assign metadata to ms$rowinfo
+ms$rowinfo <- pneumonia %>% select(id, group, age, gender, weight, height, BMI)
 ```
 
-You'll still need to render `README.Rmd` regularly, to keep `README.md` up-to-date. `devtools::build_readme()` is handy for this. You could also use GitHub Actions to re-render `README.Rmd` every time you push. An example workflow can be found here: <https://github.com/r-lib/actions/tree/v1/examples>.
 
-You can also embed plots, for example:
+Now the ms object is made
 
-```{r pressure, echo = FALSE}
-plot(pressure)
+```{r}
+
+head(ms$values[,1:10])
+
 ```
 
-In that case, don't forget to commit and push the resulting figure files, so they display on GitHub and CRAN.
+```{r}
+
+head(ms$rowinfo)
+
+```
+
+
+# Preprocessing
+```{r}
+
+# fourth root transformation
+ms <- rescience:::transform_fourth_root(ms)
+
+# Probabilistic quotient normalization
+ms <- rescience:::normalize_pqn(ms)
+
+# Visualize distributions of first 10 compounds to see effect of preprocessing
+ms$values[,1:10] %>% 
+  pivot_longer(cols = everything(), names_to = "Feature") %>%
+  mutate(Feature = as.factor(Feature)) %>% 
+  ggplot(aes(x=value, color = Feature)) +
+  geom_freqpoly()
+  
+```
+
+And if we want to see the PCA plot:
+
+```{r}
+rescience:::plot_pca(ms, color_labels = "group")
+```
+
