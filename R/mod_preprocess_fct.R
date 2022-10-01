@@ -4,16 +4,12 @@
 
 #' Transform
 #'
-#' Wrapper for all the transformation methods
+#' Wrapper for all the transformation methods. Only used in the app.
 #'
-#' @param ms
-#' @param method
+#' @param ms List object containing value data and rowinfo data (meta data)
+#' @param method Which transformation method to be used (includes fourth root and log10)
 #'
-#' @return
-#'
-#' @export
-#'
-#' @examples
+#' @return ms object
 transform <- function(ms, method){
   msX <- ms
   methods <- list("log10"=transform_log, "fourth root" = transform_fourth_root)
@@ -25,15 +21,14 @@ transform <- function(ms, method){
 }
 
 
-#' Title
+#' Impute
 #'
-#' @param ms
-#' @param method
+#' Imputes missing values. Only used for the app
 #'
-#' @return
-#' @export
+#' @param ms List object containing value data and rowinfo data (meta data)
+#' @param method Which imputation method to be used. Includes knn or 0-imputation
 #'
-#' @examples
+#' @return ms object
 impute <- function(ms, method){
   if (method == "default") return(ms)
   methods <- list("knn" = impute_knn)
@@ -43,15 +38,14 @@ impute <- function(ms, method){
 }
 
 
-#' Title
+#' Normalize
 #'
-#' @param ms
-#' @param method
+#' Normalizes the data. Only used in the app.
 #'
-#' @return
-#' @export
+#' @param ms List object containing value data and rowinfo data (meta data)
+#' @param method Which normalization method to be used.
 #'
-#' @examples
+#' @return ms
 normalize <- function(ms, method){
 
   methods <- list("PQN" = normalize_pqn,
@@ -66,31 +60,61 @@ normalize <- function(ms, method){
 
 #' Fourth root transform data
 #'
-#' @param ms
+#' @param ms List object containing value data and rowinfo data (meta data)
 #'
 #' @return ms
 #' @export
 #' @importFrom magrittr %>%
 #' @import dplyr
 #' @examples
-#' fourth_root_transform(ms)
+#' # First convert the pneumonia object to a tibble.
+#' pneumonia<- tibble::tibble(pneumonia)
+#'
+#' # Generate list object
+#' ms <- list()
+#'
+#' # Assign feature values to ms$values
+#' start_column <- 8 # The first column with feature values
+#' end_column <- ncol(pneumonia) # The last column of the dataset
+#' ms$values <- pneumonia[, start_column:end_column] %>% dplyr::slice(1:10)
+#'
+#' # Assign metadata to ms$rowinfo
+#' ms$rowinfo <- pneumonia %>% dplyr::select(id, group, age, gender, weight, height, BMI) %>% dplyr::slice(1:10) %>% dplyr::mutate(rowid = dplyr::row_number())
+#' ms <- transform_fourth_root(ms)
+#' head(ms$values)
+#' head(ms$rowinfo)
+
 transform_fourth_root <- function(ms){
   ms$values     <- ms$values^0.25 %>% tibble::as_tibble()
   return(ms)
-
 }
 
 
 #' Log transform data
 #' log(x+1)
-#' @param ms
+#' @param ms List object containing value data and rowinfo data (meta data)
 #'
 #' @return ms
 #' @export
 #' @importFrom magrittr %>%
 #' @import dplyr
 #' @examples
-#' fourth_root_transform(ms)
+#' # First convert the pneumonia object to a tibble.
+#' pneumonia<- tibble::tibble(pneumonia)
+#'
+#' # Generate list object
+#' ms <- list()
+#'
+#' # Assign feature values to ms$values
+#' start_column <- 8 # The first column with feature values
+#' end_column <- ncol(pneumonia) # The last column of the dataset
+#' ms$values <- pneumonia[, start_column:end_column] %>% dplyr::slice(1:10)
+#'
+#' # Assign metadata to ms$rowinfo
+#' ms$rowinfo <- pneumonia %>% dplyr::select(id, group, age, gender, weight, height, BMI) %>% dplyr::slice(1:10) %>% dplyr::mutate(rowid = dplyr::row_number())
+#' ms <- transform_log(ms)
+#' head(ms$values)
+#' head(ms$rowinfo)
 transform_log <- function(ms){
   ms$values     <- log(ms$values+1) %>% tibble::as_tibble()
   return(ms)
@@ -99,12 +123,28 @@ transform_log <- function(ms){
 
 #' Missing value imputation: Zero replacement
 #'
-#' @param ms
+#' @param ms List object containing value data and rowinfo data (meta data)
 #'
-#' @return
+#' @return ms
 #' @export
 #'
 #' @examples
+#' # First convert the pneumonia object to a tibble.
+#' pneumonia<- tibble::tibble(pneumonia)
+#'
+#' # Generate list object
+#' ms <- list()
+#'
+#' # Assign feature values to ms$values
+#' start_column <- 8 # The first column with feature values
+#' end_column <- ncol(pneumonia) # The last column of the dataset
+#' ms$values <- pneumonia[, start_column:end_column] %>% dplyr::slice(1:10)
+#'
+#' # Assign metadata to ms$rowinfo
+#' ms$rowinfo <- pneumonia %>% dplyr::select(id, group, age, gender, weight, height, BMI) %>% dplyr::slice(1:10) %>% dplyr::mutate(rowid = dplyr::row_number())
+#' ms <- impute_zero(ms)
+#' head(ms$values)
+#' head(ms$rowinfo)
 impute_zero <- function(ms){
   ms$values[is.na(ms$values)] <- 0
   return(ms)
@@ -113,12 +153,28 @@ impute_zero <- function(ms){
 
 #' Missing value imputation: knn replacement
 #'
-#' @param ms
+#' @param ms List object containing value data and rowinfo data (meta data)
 #'
-#' @return
+#' @return ms
 #' @export
 #'
 #' @examples
+#' # First convert the pneumonia object to a tibble.
+#' pneumonia<- tibble::tibble(pneumonia)
+#'
+#' # Generate list object
+#' ms <- list()
+#'
+#' # Assign feature values to ms$values
+#' start_column <- 8 # The first column with feature values
+#' end_column <- ncol(pneumonia) # The last column of the dataset
+#' ms$values <- pneumonia[, start_column:end_column] %>% dplyr::slice(1:10)
+#'
+#' # Assign metadata to ms$rowinfo
+#' ms$rowinfo <- pneumonia %>% dplyr::select(id, group, age, gender, weight, height, BMI) %>% dplyr::slice(1:10) %>% dplyr::mutate(rowid = dplyr::row_number())
+#' ms <- impute_knn(ms)
+#' head(ms$values)
+#' head(ms$rowinfo)
 impute_knn <- function(ms){
   tmp1          <- ms$values %>% as.matrix() %>% t()
   tmp1[tmp1==0] <- NA
@@ -139,27 +195,47 @@ impute_knn <- function(ms){
 #   return(ms)
 # }
 
-#' Missing value imputation: Random Forest replacement
-#'
-#' @param ms
-#'
-#' @return
-#' @export
-#'
-#' @examples
-impute_RF <- function(ms){
-  tmp1          <- ms$values %>% as.matrix()
-  tmp1[tmp1==0] <- NA
-  doParallel::registerDoParallel(cores=8)
-  tmp1_imputed  <-
-    missForest::missForest(
-      tmp1, maxiter = 10, ntree = 100, variablewise = FALSE, verbose = TRUE, parallelize = "variables"
-    )
-
-  tmp1          <- tmp1_imputed$data %>% t() %>% tibble::as_tibble()
-  ms$values     <- tmp1
-  return(ms)
-}
+#
+# #' Missing value imputation: Random Forest replacement
+# #'
+# #' Beware! This algorithm might run longer than your lifespan.
+# #'
+# #' @param ms List object containing value data and rowinfo data (meta data)
+# #'
+# #' @return ms
+# #' @export
+# #'
+# #' @examples
+# #' # First convert the pneumonia object to a tibble.
+# #' pneumonia<- tibble::tibble(pneumonia)
+# #'
+# #' # Generate list object
+# #' ms <- list()
+# #'
+# #' # Assign feature values to ms$values
+# #' start_column <- 8 # The first column with feature values
+# #' end_column <- ncol(pneumonia) # The last column of the dataset
+# #' ms$values <- pneumonia[, start_column:end_column] %>% dplyr::slice(1:10)
+# #'
+# #' # Assign metadata to ms$rowinfo
+# #' ms$rowinfo <- pneumonia %>% dplyr::select(id, group, age, gender, weight, height, BMI) %>% dplyr::slice(1:10) %>% dplyr::mutate(rowid = dplyr::row_number())
+# #' ms <- impute_zero(ms)
+# #' ms <- impute_RF(ms)
+# #' head(ms$values)
+# #' head(ms$rowinfo)
+# impute_RF <- function(ms){
+#   tmp1          <- ms$values %>% as.matrix()
+#   tmp1[tmp1==0] <- NA
+#   doParallel::registerDoParallel(cores=8)
+#   tmp1_imputed  <-
+#     missForest::missForest(
+#       tmp1, maxiter = 10, ntree = 100, variablewise = FALSE, verbose = TRUE, parallelize = "variables"
+#     )
+#
+#   tmp1          <- tmp1_imputed$data %>% t() %>% tibble::as_tibble()
+#   ms$values     <- tmp1
+#   return(ms)
+# }
 
 
 
@@ -167,28 +243,44 @@ impute_RF <- function(ms){
 #'
 #' This might help avoiding batch effect and identification of batches through signals with binary (on/off) behaviour
 #'
-#' @param ms
+#' @param ms List object containing value data and rowinfo data (meta data)
 #'
 #' @return ms
 #' @export
 #' @importFrom magrittr %>%
 #' @import dplyr
+#' @import tidyr
 #' @examples
-#' rm_feature_batch_inflated_zeros(ms)
+#' # First convert the pneumonia object to a tibble.
+#' pneumonia<- tibble::tibble(pneumonia)
+#' # Generate list object
+#' ms <- list()
+#' # Assign feature values to ms$values
+#' start_column <- 8 # The first column with feature values
+#' end_column <- ncol(pneumonia) # The last column of the dataset
+#' ms$values <- pneumonia[, start_column:end_column] %>% dplyr::slice(1:10)
+#' # Assign metadata to ms$rowinfo
+#' ms$rowinfo <- pneumonia %>% dplyr::select(id, group, age, gender, weight, height, BMI) %>% dplyr::slice(1:10) %>% dplyr::mutate(rowid = dplyr::row_number())
+#' ms <- impute_zero(ms)
+#' ms <- rm_feature_batch_inflated_zeros(ms)
+#' head(ms$values)
+#' head(ms$rowinfo)
+
 rm_feature_batch_inflated_zeros <- function(ms){
 
   raw     <- ms$values
   rowinfo <- ms$rowinfo
 
-  tmp1 <- rowinfo %>% select(BATCH) %>%
-    bind_cols(raw) %>%
-    pivot_longer(cols = starts_with("M")) %>%
-    group_by(BATCH, name) %>%
-    summarise(zeros = mean(value==0))
+  tmp1 <- rowinfo %>%
+    dplyr::select(BATCH) %>%
+    dplyr::bind_cols(raw) %>%
+    tidyr::pivot_longer(cols = starts_with("M")) %>%
+    dplyr::group_by(BATCH, name) %>%
+    dplyr::summarise(zeros = mean(value==0))
 
   bad_features <- tmp1[tmp1$zeros>0.2,] %>% pull(name) %>% table %>%  names() %>%  unique()
 
-  raw <- raw %>% select(-any_of(bad_features))
+  raw <- raw %>% dplyr::select(-dplyr::any_of(bad_features))
 
   ms$values <- raw
   ms$rowinfo <- ms$rowinfo
@@ -201,23 +293,41 @@ rm_feature_batch_inflated_zeros <- function(ms){
 #'
 #' Is usable if preceeded by batch normalization
 #'
-#' @param ms
+#' @param ms List object containing value data and rowinfo data (meta data)
 #'
 #' @return ms
 #' @export
 #' @importFrom magrittr %>%
 #' @import dplyr
 #' @examples
-#' rm_sample_min_batch_occurence(ms)
+#' # First convert the pneumonia object to a tibble.
+#' pneumonia<- tibble::tibble(pneumonia)
+#'
+#' # Generate list object
+#' ms <- list()
+#'
+#' # Assign feature values to ms$values
+#' start_column <- 8 # The first column with feature values
+#' end_column <- ncol(pneumonia) # The last column of the dataset
+#' ms$values <- pneumonia[, start_column:end_column] %>% dplyr::slice(1:10)
+#'
+#' # Assign metadata to ms$rowinfo
+#' ms$rowinfo <- pneumonia %>% dplyr::select(id, group, age, gender, weight, height, BMI) %>% dplyr::slice(1:10) %>% dplyr::mutate(rowid = dplyr::row_number())
+#' ms <- impute_zero(ms)
+#' ms <- rm_sample_min_batch_occurence(ms)
+#' head(ms$values)
+#' head(ms$rowinfo)
+
+
 rm_sample_min_batch_occurence <- function(ms, min_occurence = 5){
 
   tmp1 <- ms$rowinfo
   tmp2 <- ms$values
 
   small_batches <- table(tmp1$BATCH)[table(tmp1$BATCH) < min_occurence] %>% names
-  tmp1 <- tmp1 %>% filter(!BATCH %in% small_batches)
+  tmp1 <- tmp1 %>% dplyr::filter(!BATCH %in% small_batches)
   tmp2 <- tmp2[tmp1$rowid,]
-  tmp1 <- tmp1 %>% mutate(rowid = row_number())
+  tmp1 <- tmp1 %>% dplyr::mutate(rowid = dplyr::row_number())
 
   ms$rowinfo <- tmp1
   ms$values <- tmp2
@@ -233,47 +343,61 @@ rm_sample_min_batch_occurence <- function(ms, min_occurence = 5){
 #'
 #' May be applied before row normalization but after removal of extreme features.
 #'
-#' @param ms
+#' @param ms List object containing value data and rowinfo data (meta data)
 #'
 #' @return ms
 #' @export
 #' @importFrom magrittr %>%
 #' @import dplyr
 #' @examples
-#' rm_sample_pca_outliers(ms)
+#' # First convert the pneumonia object to a tibble.
+#' pneumonia<- tibble::tibble(pneumonia)
+#'
+#' # Generate list object
+#' ms <- list()
+#'
+#' # Assign feature values to ms$values
+#' start_column <- 8 # The first column with feature values
+#' end_column <- ncol(pneumonia) # The last column of the dataset
+#' ms$values <- pneumonia[, start_column:end_column] %>% dplyr::slice(1:10)
+#'
+#' # Assign metadata to ms$rowinfo
+#' ms$rowinfo <- pneumonia %>% dplyr::select(id, group, age, gender, weight, height, BMI) %>% dplyr::slice(1:10) %>% dplyr::mutate(rowid = dplyr::row_number())
+#' ms <- impute_zero(ms)
+#' ms <- rm_sample_pca_outliers(ms)
 rm_sample_pca_outliers <- function(ms, plot = FALSE) {
 
-  raw     <-  ms$values
+  raw     <- ms$values
   rowinfo <- ms$rowinfo
 
-  tmp1 <- ms$rowinfo %>% mutate(rowid2 = row_number())
+  tmp1 <- ms$rowinfo %>% dplyr::mutate(rowid2 = row_number())
   tmp2 <- raw[tmp1$rowid,]
 
   r  <- prcomp(x = tmp2, retx = T, center=T, scale. = T, rank. = 12)
 
-  bad_rows <- tibble(rowid2=apply(r$x, 2, function(x) {
+  bad_rows<- tibble::tibble(rowid2=apply(r$x, 2, function(x) {
     which(abs(x - median(x)) > (1.5 * quantile(x,0.95)-quantile(x,0.05)))
   }) %>%
     unlist() %>%
     as.vector()) %>%
-    count(rowid2)
+    dplyr::count(rowid2)
 
   tmp1 <- tmp1 %>%
-    left_join(bad_rows) %>%
-    mutate(n=ifelse(is.na(n), 0,n)) %>%
-    mutate(label=case_when(
+    dplyr::left_join(bad_rows) %>%
+    dplyr::mutate(n=ifelse(is.na(n), 0,n)) %>%
+    dplyr::mutate(label=dplyr::case_when(
       n>0 ~ sample,
       n==0 ~ "")) %>%
     {.}
 
   pd <- r$x %>%
     tibble::as_tibble() %>%
-    bind_cols(tmp1) %>%
+    dplyr::bind_cols(tmp1) %>%
     {.}
 
   pd <- pd %>%
-    mutate(response = ifelse(n>0,"Outlier", "Not outlier")) %>%
-    mutate(response = factor(response))
+    dplyr::mutate(response = ifelse(n>0,"Outlier", "Not outlier")) %>%
+    dplyr::mutate(response = factor(response))
 
   if (plot) {
     plotlist <- list()
@@ -281,11 +405,11 @@ rm_sample_pca_outliers <- function(ms, plot = FALSE) {
     for(i in 1:(ncol(r$x)/2)) {
       xvar <- names(pd)[2*i-1]
       yvar <- names(pd)[2*i]
-      p1 <- ggplot(pd,aes(x=!!ensym(xvar), y=!!ensym(yvar),
+      p1 <- ggplot2::ggplot(pd,ggplot2::aes(x=!!ensym(xvar), y=!!ensym(yvar),
                           fill=response, label=label))+
-        geom_point(shape=21, color="#FFFFFFFF", size=3) +
-        scale_fill_manual(values = c("#D0D0D0", "#D04040")) +
-        theme(legend.position="none") +
+        ggplot2::geom_point(shape=21, color="#FFFFFFFF", size=3) +
+        ggplot2::scale_fill_manual(values = c("#D0D0D0", "#D04040")) +
+        ggplot2::theme(legend.position="none") +
         NULL
 
       plotlist[[length(plotlist)+1]] <- p1
@@ -296,7 +420,7 @@ rm_sample_pca_outliers <- function(ms, plot = FALSE) {
     rm(plotlist)
   }
 
-  bad_rows <- tmp1 %>% filter(n>0)
+  bad_rows <- tmp1 %>% dplyr::filter(n>0)
 
   if (nrow(bad_rows) > 0) {
     ms$values  <- raw[-bad_rows$rowid2,] %>% tibble::as_tibble()
@@ -304,62 +428,80 @@ rm_sample_pca_outliers <- function(ms, plot = FALSE) {
   }
 
   ms$rowinfo <- ms$rowinfo %>%
-    mutate(rowid = row_number())
+    dplyr::mutate(rowid = row_number())
 
   return(ms)
 }
 
 
-#' Remove samples if internal standards are crazy
+#' Remove samples if internal standards are outliers
 #'
-#' @param ms
-#' @param standards
-#' e.g., M215T123
-#' @param tolerance
-#' Max: number of standards
-#' Min: 1
-#' The smaller the more restrictive. The tolerance reflects the number of crazy ISs allowed per sample.
-#' @param quantiles
 #'
-#' @return
+#' @param quantiles {How extreme should an IS value be before being assigned as an outlier.}
+#' @param ms {List object containing value data and rowinfo data (meta data)}
+#' @param standards {Vector containing column names of the internal standards e.g., M215T123}
+#' @param tolerance {Number of how many internal standards that must lie outside 95 percent of the distribution before a sample is excluded.
+#' Max number of standards
+#' Min 1
+#' The smaller the more restrictive. The tolerance reflects the number of outlier ISs allowed per sample.
+#' Outlier is given by lying in the 5 percent most extreme values. This means that if a threshold of 1 is used 5 percent of samples are removed.
+#' This should be used carefully.}
+#'
+#' @return ms
 #' @export
 #'
-#' @examples
+#' @example
+#' # First convert the pneumonia object to a tibble.
+#' pneumonia <- tibble::tibble(pneumonia)
+#' # Generate list object
+#' ms <- list()
+#' # Assign feature values to ms$values
+#' start_column <- 8 # The first column with feature values
+#' end_column <- ncol(pneumonia) # The last column of the dataset
+#' ms$values <- pneumonia[, start_column:end_column] %>% dplyr::slice(1:10)
+#' # Assign metadata to ms$rowinfo
+#' ms$rowinfo <-
+#'     pneumonia %>%
+#'     dplyr::select(id, group, age, gender, weight, height, BMI) %>%
+#'     dplyr::slice(1:10) %>%
+#'     dplyr::mutate(rowid = dplyr::row_number())
+#' ms <- impute_zero(ms)
+#' ms <- rm_IS_outliers(ms, standards = c("M363T419","M512T603","M364T419","M365T392", "M143T177"), tolerance = 4, quantiles = c(0.01, 0.99))
 rm_IS_outliers <- function(ms, standards, tolerance = 0, quantiles = c(0.025, 0.975)){
   tmp1 <- ms$rowinfo
   tmp2 <- ms$values
 
   good_data <-
     tmp2 %>%
-    select(all_of(standards)) %>%
-    bind_cols(tmp1) %>%
-    pivot_longer(cols = all_of(standards)) %>%
-    mutate(batch = as.factor(BATCH))
+    dplyr::select(all_of(standards)) %>%
+    dplyr::bind_cols(tmp1) %>%
+    tidyr::pivot_longer(cols = all_of(standards)) %>%
+    dplyr::mutate(batch = as.factor(BATCH))
 
   good_data <-
     good_data %>%
-    group_by(name) %>%
-    mutate(outlier = value >= quantile(value, quantiles[2]) | value <= quantile(value, quantiles[1])) %>%
-    ungroup()
+    dplyr::group_by(name) %>%
+    dplyr::mutate(outlier = value >= quantile(value, quantiles[2]) | value <= quantile(value, quantiles[1])) %>%
+    dplyr::ungroup()
 
   a <-
-    ggplot(good_data) +
-    geom_point(aes(y=value, x=rowid, color = batch), show.legend = F)+
-    geom_point(data = good_data %>% filter(outlier), aes(y=value, x=rowid), color = "gray40")+
-    facet_wrap(~name, ncol = 1) +
+    ggplot2::ggplot(good_data) +
+    ggplot2::geom_point(ggplot2::aes(y=value, x=rowid, color = batch), show.legend = F)+
+    ggplot2::geom_point(data = good_data %>% dplyr::filter(outlier), ggplot2::aes(y=value, x=rowid), color = "gray40")+
+    ggplot2::facet_wrap(~name, ncol = 1) +
     NULL
   print(a)
 
   bad_samples <-
     good_data %>%
-    filter(outlier == TRUE) %>%
-    count(rowid) %>%
-    filter(n >= tolerance) %>%
-    pull(rowid)
+    dplyr::filter(outlier == TRUE) %>%
+    dplyr::count(rowid) %>%
+    dplyr::filter(n >= tolerance) %>%
+    dplyr::pull(rowid)
 
-  ms$rowinfo <- ms$rowinfo %>% filter(!(rowid %in% bad_samples))
+  ms$rowinfo <- ms$rowinfo %>% dplyr::filter(!(rowid %in% bad_samples))
   ms$values <- ms$values[ms$rowinfo$rowid,]
-  ms$rowinfo <- ms$rowinfo %>% mutate(rowid = row_number())
+  ms$rowinfo <- ms$rowinfo %>% dplyr::mutate(rowid = dplyr::row_number())
 
   return(ms)
 }
@@ -372,37 +514,51 @@ rm_IS_outliers <- function(ms, standards, tolerance = 0, quantiles = c(0.025, 0.
 #'
 #' May be applied before row normalization but after removal of extreme features.
 #'
-#' @param ms
+#' @param ms List object containing value data and rowinfo data (meta data)
 #'
 #' @return ms
 #' @export
 #' @importFrom magrittr %>%
 #' @import dplyr
+#' @import tidyr
 #' @examples
-#' rm_feature_extreme_values(ms)
+#' # First convert the pneumonia object to a tibble.
+#' pneumonia<- tibble::tibble(pneumonia)
+#' # Generate list object
+#' ms <- list()
+#' # Assign feature values to ms$values
+#' start_column <- 8 # The first column with feature values
+#' end_column <- ncol(pneumonia) # The last column of the dataset
+#' ms$values <- pneumonia[, start_column:end_column] %>% dplyr::slice(1:10)
+#' # Assign metadata to ms$rowinfo
+#' ms$rowinfo <- pneumonia %>% dplyr::select(id, group, age, gender, weight, height, BMI) %>% dplyr::slice(1:10) %>% dplyr::mutate(rowid = dplyr::row_number())
+#' ms <- impute_zero(ms)
+#' ms <- rm_feature_extreme_values(ms)
 rm_feature_extreme_values <- function(ms) {
 
   raw     <- ms$values
   rowinfo <- ms$rowinfo
 
-  tmp1 <- tibble(rowid = rowinfo$rowid) %>%
-    bind_cols(tibble::as_tibble(raw))
+  tmp1 <-
+    tibble::tibble(rowid = rowinfo$rowid) %>%
+    dplyr::bind_cols(tibble::as_tibble(raw))
 
-  tmp1 <- tmp1 %>%
-    pivot_longer(names_to = "compound", values_to = "value",  cols= c(-rowid))
+  tmp1 <-
+    tmp1 %>%
+    tidyr::pivot_longer(names_to = "compound", values_to = "value",  cols= c(-rowid))
 
   tmp2 <- tmp1 %>%
-    group_by(compound) %>%
-    summarise(n_bad = sum(value > median(value)+2*quantile(value,0.95))) %>%
+    dplyr::group_by(compound) %>%
+    dplyr::summarise(n_bad = sum(value > median(value)+2*quantile(value,0.95))) %>%
     {.}
 
   bad_features <- tmp2 %>%
-    ungroup() %>%
-    filter(n_bad > 0) %>%
-    select(compound) %>%
-    distinct()
+    dplyr::ungroup() %>%
+    dplyr::filter(n_bad > 0) %>%
+    dplyr::select(compound) %>%
+    dplyr::distinct()
 
-  ms$values <- raw %>% select(-any_of(bad_features$compound))
+  ms$values <- raw %>% dplyr::select(-dplyr::any_of(bad_features$compound))
   ms$rowinfo <- rowinfo
 
   return(ms)
@@ -415,14 +571,27 @@ rm_feature_extreme_values <- function(ms) {
 #' Only stable features used to normalize the rows (each sample)
 #' Corrects matrix effects
 #'
-#' @param ms
+#' @param ms List object containing value data and rowinfo data (meta data)
 #'
 #' @return ms
 #' @export
 #' @importFrom magrittr %>%
 #' @import dplyr
+#' @import tidyr
 #' @examples
-#' robust_row_normalize(ms)
+#' # First convert the pneumonia object to a tibble.
+#' library(dplyr)
+#' pneumonia<- tibble::tibble(pneumonia)
+#' # Generate list object
+#' ms <- list()
+#' # Assign feature values to ms$values
+#' start_column <- 8 # The first column with feature values
+#' end_column <- ncol(pneumonia) # The last column of the dataset
+#' ms$values <- pneumonia[, start_column:end_column] %>% dplyr::slice(1:100)
+#' # Assign metadata to ms$rowinfo
+#' ms$rowinfo <- pneumonia %>% dplyr::select(id, group, age, gender, weight, height, BMI) %>% dplyr::slice(1:100) %>% dplyr::mutate(rowid = dplyr::row_number())
+#' ms <- impute_zero(ms)
+#' ms <- normalize_robust_row(ms)
 normalize_robust_row <- function(ms) {
 
   target_info   <- ms$rowinfo
@@ -431,23 +600,24 @@ normalize_robust_row <- function(ms) {
   tmp1 <- target_info
   tmp2 <- target_values[tmp1$rowid,]
 
-  stable_features <- tmp1 %>%
-    bind_cols(tmp2) %>%
-    pivot_longer(starts_with("M")) %>%
-    group_by(sample) %>%
-    mutate(rank=rank(value)) %>%
-    ungroup() %>%
-    group_by(name) %>%
-    summarise(median = median(rank),
-              range = max(rank)-min(rank)) %>%
-    ungroup() %>%
-    slice_min(order_by = median, prop = 0.8) %>%
-    slice_max(order_by = median, prop = 0.8) %>%
-    slice_min(order_by = range, prop = 0.8)
+  stable_features <-
+    tmp1 %>%
+    dplyr::bind_cols(tmp2) %>%
+    tidyr::pivot_longer(dplyr::starts_with("M")) %>%
+    dplyr::group_by(rowid) %>%
+    dplyr::mutate(rank=rank(value)) %>%
+    dplyr::ungroup() %>%
+    dplyr::group_by(name) %>%
+    dplyr::summarise(median = median(rank),
+                     range = max(rank)-min(rank)) %>%
+    dplyr::ungroup() %>%
+    dplyr::slice_min(order_by = median, prop = 0.8) %>%
+    dplyr::slice_max(order_by = median, prop = 0.8) %>%
+    dplyr::slice_min(order_by = range, prop = 0.8)
 
   raw    <- target_values
   data.x <- raw
-  tmp    <- rowSums(target_values %>% select(any_of(stable_features$name)))
+  tmp    <- rowSums(target_values %>% dplyr::select(dplyr::any_of(stable_features$name)))
   raw    <- max(raw)*raw / tmp
 
   ms$values  <- raw
@@ -460,14 +630,31 @@ normalize_robust_row <- function(ms) {
 
 #' Probabilistic quotient normalization
 #'
-#' @param X
-#' @param n
-#' @param QC
+#' @param ms List object containing value data and rowinfo data (meta data)
+#' @param n Summary function
+#' @param QC Available QC column?
 #'
-#' @return
+#' @return ms
 #' @export
 #'
 #' @examples
+#' # First convert the pneumonia object to a tibble.
+#' pneumonia<- tibble::tibble(pneumonia)
+#'
+#' # Generate list object
+#' ms <- list()
+#'
+#' # Assign feature values to ms$values
+#' start_column <- 8 # The first column with feature values
+#' end_column <- ncol(pneumonia) # The last column of the dataset
+#' ms$values <- pneumonia[, start_column:end_column] %>% dplyr::slice(1:10)
+#'
+#' # Assign metadata to ms$rowinfo
+#' ms$rowinfo <- pneumonia %>% dplyr::select(id, group, age, gender, weight, height, BMI) %>% dplyr::slice(1:10) %>% dplyr::mutate(rowid = dplyr::row_number())
+#' ms <- impute_zero(ms)
+#' ms <- normalize_pqn(ms)
+#' head(ms$values)
+#' head(ms$rowinfo)
 normalize_pqn <- function(ms, n = "median", QC = NULL) {
   X <- ms$values %>% as.matrix()
   X.norm <- matrix(nrow = nrow(X), ncol = ncol(X))
@@ -509,16 +696,34 @@ normalize_pqn <- function(ms, n = "median", QC = NULL) {
 
 #' Normalize using waveICA2
 #'
-#' @param ms
+#' @param ms List object containing value data and rowinfo data (meta data)
 #'
-#' @return
+#' @return ms
 #' @export
 #'
 #' @examples
+#' # First convert the pneumonia object to a tibble.
+#' pneumonia<- tibble::tibble(pneumonia)
+#'
+#' # Generate list object
+#' ms <- list()
+#'
+#' # Assign feature values to ms$values
+#' start_column <- 8 # The first column with feature values
+#' end_column <- ncol(pneumonia) # The last column of the dataset
+#' ms$values <- pneumonia[, start_column:end_column] %>% dplyr::slice(1:10)
+#'
+#' # Assign metadata to ms$rowinfo
+#' ms$rowinfo <- pneumonia %>% dplyr::select(id, group, age, gender, weight, height, BMI) %>% dplyr::slice(1:10) %>% dplyr::mutate(rowid = dplyr::row_number())
+#' ms <- impute_zero(ms)
+#' ms <- normalize_waveICA2(ms)
+#' head(ms$values)
+#' head(ms$rowinfo)
+#'
 normalize_waveICA2 <- function(ms){
   tmp1 <- ms$rowinfo
   tmp2 <- ms$values %>% as.matrix()
-  tmp3 <- WaveICA2.0::WaveICA_2.0(tmp2, Injection_Order = 1:nrow(tmp2), Cutoff = 0.1, wf = "haar", K = 20, alpha = 0)
+  tmp3 <- WaveICA_2.0(tmp2, Injection_Order = 1:nrow(tmp2), Cutoff = 0.1, wf = "haar", K = 20, alpha = 0)
   tmp3 <- tmp3$data_wave
   ms$values <- tmp3 %>% tibble::as_tibble()
   return(ms)
@@ -526,15 +731,15 @@ normalize_waveICA2 <- function(ms){
 
 #' Normalize using combat
 #'
-#' @param ms
+#' @param ms List object containing value data and rowinfo data (meta data)
 #'
-#' @return
+#' @return ms
 #' @export
 #'
-#' @examples
+
 normalize_combat <- function(ms){
   ms$values <-
-    sva::ComBat(t(ms$values), batch = as.numeric(as.factor(ms$rowinfo$BATCH))) %>%
+    ComBat(t(ms$values), batch = as.numeric(as.factor(ms$rowinfo$BATCH))) %>%
     t() %>%
     tibble::as_tibble()
   return(ms)
@@ -542,12 +747,30 @@ normalize_combat <- function(ms){
 
 #' Quantile normalize using limma (quantile normalization)
 #'
-#' @param ms
+#' @param ms List object containing value data and rowinfo data (meta data)
 #'
-#' @return
+#' @return ms
 #' @export
 #'
 #' @examples
+#' # First convert the pneumonia object to a tibble.
+#' pneumonia<- tibble::tibble(pneumonia)
+#'
+#' # Generate list object
+#' ms <- list()
+#'
+#' # Assign feature values to ms$values
+#' start_column <- 8 # The first column with feature values
+#' end_column <- ncol(pneumonia) # The last column of the dataset
+#' ms$values <- pneumonia[, start_column:end_column] %>% dplyr::slice(1:10)
+#'
+#' # Assign metadata to ms$rowinfo
+#' ms$rowinfo <- pneumonia %>% dplyr::select(id, group, age, gender, weight, height, BMI) %>% dplyr::slice(1:10) %>% dplyr::mutate(rowid = dplyr::row_number())
+#' ms <- impute_zero(ms)
+#' ms <- normalize_limma_quantile(ms)
+#' head(ms$values)
+#' head(ms$rowinfo)
+#'
 normalize_limma_quantile <- function(ms){
   ms$values <- limma::normalizeBetweenArrays(as.matrix(ms$values), method = "quantile") %>% tibble::as_tibble()
   return(ms)
@@ -556,30 +779,66 @@ normalize_limma_quantile <- function(ms){
 
 #' Cyclic loss normalize using limma
 #'
-#' @param ms
+#' @param ms List object containing value data and rowinfo data (meta data)
 #'
 #' @return ms
 #' @export
 #'
 #' @examples
+#' # First convert the pneumonia object to a tibble.
+#' pneumonia<- tibble::tibble(pneumonia)
+#'
+#' # Generate list object
+#' ms <- list()
+#'
+#' # Assign feature values to ms$values
+#' start_column <- 8 # The first column with feature values
+#' end_column <- ncol(pneumonia) # The last column of the dataset
+#' ms$values <- pneumonia[, start_column:end_column] %>% dplyr::slice(1:10)
+#'
+#' # Assign metadata to ms$rowinfo
+#' ms$rowinfo <- pneumonia %>% dplyr::select(id, group, age, gender, weight, height, BMI) %>% dplyr::slice(1:10) %>% dplyr::mutate(rowid = dplyr::row_number())
+#' ms <- impute_zero(ms)
+#' ms <- normalize_limma_cyclicloess(ms)
+#' head(ms$values)
+#' head(ms$rowinfo)
+#'
 normalize_limma_cyclicloess <- function(ms){
   ms$values <- limma::normalizeBetweenArrays(ms$values, method = "cyclicloess")
   return(ms)
 }
 
 
-#' Select top n most variable features
+#'dplyr::select top n most variable features
 #'
 #' Effective for model screening to avoid heavy work loads. Often top 500 contains most of the signal.
 #'
-#' @param ms
+#' @param ms List object containing value data and rowinfo data (meta data)
 #'
 #' @return ms
 #' @export
 #' @importFrom magrittr %>%
 #' @import dplyr
+#' @import tidyr
 #' @examples
-#' select_most_variable_features(ms)
+#' # First convert the pneumonia object to a tibble.
+#' pneumonia<- tibble::tibble(pneumonia)
+#'
+#' # Generate list object
+#' ms <- list()
+#'
+#' # Assign feature values to ms$values
+#' start_column <- 8 # The first column with feature values
+#' end_column <- ncol(pneumonia) # The last column of the dataset
+#' ms$values <- pneumonia[, start_column:end_column] %>% dplyr::slice(1:10)
+#'
+#' # Assign metadata to ms$rowinfo
+#' ms$rowinfo <- pneumonia %>% dplyr::select(id, group, age, gender, weight, height, BMI) %>% dplyr::slice(1:10) %>% dplyr::mutate(rowid = dplyr::row_number())
+#' ms <- impute_zero(ms)
+#' ms <-dplyr::select_most_variable_features(ms, n=10)
+#' head(ms$values)
+#' head(ms$rowinfo)
+#'
 select_most_variable_features <- function(ms, n=500) {
   raw <- ms$values
   rowinfo <- ms$rowinfo
@@ -588,17 +847,17 @@ select_most_variable_features <- function(ms, n=500) {
   tmp2 <- raw[tmp1$rowid,]
 
   good_features <- tmp2 %>%
-    bind_cols(tmp1) %>%
-    pivot_longer(starts_with("M")) %>% # Convert to tidy format
-    group_by(name) %>%
-    summarise(mean = mean(value),
-              variation = var(value)/mean(value)) %>%
-    arrange(-variation) %>%
-    slice(1:n) %>%
+    dplyr::bind_cols(tmp1) %>%
+    tidyr::pivot_longer(dplyr::starts_with("M")) %>% # Convert to tidy format
+    dplyr::group_by(name) %>%
+    dplyr::summarise(mean = mean(value),
+                     variation = var(value)/mean(value)) %>%
+    dplyr::arrange(-variation) %>%
+    dplyr::slice(1:n) %>%
     pull(name)
 
   ms$rowinfo <- rowinfo
-  ms$values  <- raw %>% select(any_of(good_features))
+  ms$values  <- raw %>% dplyr::select(dplyr::any_of(good_features))
 
   return(ms)
 }
@@ -608,41 +867,59 @@ select_most_variable_features <- function(ms, n=500) {
 #' Z-standardization of batches
 #'
 #'
-#' @param ms
+#' @param ms List object containing value and meta data
 #'
 #' @return ms
 #' @export
 #' @importFrom magrittr %>%
 #' @import dplyr
+#' @import tidyr
 #' @examples
-#' normalize_batch(ms)
+#' # First convert the pneumonia object to a tibble.
+#' pneumonia<- tibble::tibble(pneumonia)
+#'
+#' # Generate list object
+#' ms <- list()
+#'
+#' # Assign feature values to ms$values
+#' start_column <- 8 # The first column with feature values
+#' end_column <- ncol(pneumonia) # The last column of the dataset
+#' ms$values <- pneumonia[, start_column:end_column] %>% dplyr::slice(1:10)
+#'
+#' # Assign metadata to ms$rowinfo
+#' ms$rowinfo <- pneumonia %>% dplyr::select(id, group, age, gender, weight, height, BMI) %>% dplyr::slice(1:10) %>% dplyr::mutate(rowid = dplyr::row_number())
+#' ms <- impute_zero(ms)
+#' ms <- standardize_z_batch(ms)
+#' head(ms$values)
+#' head(ms$rowinfo)
+#'
 standardize_z_batch <- function(ms, batch_column = "BATCH") {
   raw <- ms$values
   target_info <- ms$rowinfo
 
-  tmp1 <- tibble(batch = target_info[[batch_column]], rowid = target_info$rowid) %>%
-    bind_cols(tibble::as_tibble(raw)) %>%
-    pivot_longer(names_to = "compound", values_to = "value",  cols= c(-batch, -rowid))
+  tmp1<- tibble::tibble(batch = target_info[[batch_column]], rowid = target_info$rowid) %>%
+    dplyr::bind_cols(tibble::as_tibble(raw)) %>%
+    tidyr::pivot_longer(names_to = "compound", values_to = "value",  cols= c(-batch, -rowid))
 
   tmp2 <- tmp1 %>%
-    group_by(batch, compound) %>%
-    summarise(value.batch_mean = mean(value),
-              value.batch_sd   = sd(value))
+    dplyr::group_by(batch, compound) %>%
+    dplyr::summarise(value.batch_mean = mean(value),
+                     value.batch_sd   = sd(value))
 
 
-  tmp1 <- full_join(x = tmp1, y = tmp2, all.x = TRUE) %>%
-    mutate(value2 = (value- value.batch_mean)/(value.batch_sd)) %>% #
-    mutate(value2 = ifelse((
+  tmp1 <- dplyr::full_join(x = tmp1, y = tmp2, all.x = TRUE) %>%
+    dplyr::mutate(value2 = (value- value.batch_mean)/(value.batch_sd)) %>% #
+    dplyr::mutate(value2 = ifelse((
       value.batch_mean==0 &
         value.batch_sd==0) |
         value == 0, 0, value2
     )) %>%
-    select(batch, rowid, compound,value2) %>%
-    pivot_wider(names_from = compound, values_from = value2)
+    dplyr::select(batch, rowid, compound,value2) %>%
+    tidyr::pivot_wider(names_from = compound, values_from = value2)
 
   raw <- tmp1 %>%
-    arrange(rowid) %>%
-    select(-batch, -rowid)
+    dplyr::arrange(rowid) %>%
+    dplyr::select(-batch, -rowid)
 
   ms$rowinfo <- target_info
   ms$values  <- raw
@@ -651,20 +928,36 @@ standardize_z_batch <- function(ms, batch_column = "BATCH") {
 
 
 
-#' PCA plot
+#' PCA plot (beta)
 #'
-#' @param tmp1
-#' @param tmp2
-#' @param color_labels
+#' @param ms List object containing value and metadata
+#' @param color_labels coloring code for plot
 #'
-#' @return
+#' @return ggplot2 plot
 #' @export
 #'
 #' @import dplyr cowplot
-#' @importFrom ggplot2 ggplot aes_string labs theme ggdraw draw_label geom_point
+#' @importFrom ggplot2 ggplot aes_string labs theme geom_point
+#' @importFrom cowplot draw_label ggdraw
 #'
 #' @examples
-plot_pca <- function(ms, color_labels=c("AGE_YEARS", "BATCH")) {
+#' # First convert the pneumonia object to a tibble.
+#' pneumonia<- tibble::tibble(pneumonia)
+#'
+#' # Generate list object
+#' ms <- list()
+#'
+#' # Assign feature values to ms$values
+#' start_column <- 8 # The first column with feature values
+#' end_column <- ncol(pneumonia) # The last column of the dataset
+#' ms$values <- pneumonia[, start_column:end_column] %>% dplyr::slice(1:10)
+#'
+#' # Assign metadata to ms$rowinfo
+#' ms$rowinfo <- pneumonia %>% dplyr::select(id, group, age, gender, weight, height, BMI) %>% dplyr::slice(1:10) %>% dplyr::mutate(rowid = dplyr::row_number())
+#' ms <- impute_zero(ms)
+#' plot_pca(ms, color_labels = "rowid")
+#'
+plot_pca <- function(ms, color_labels=c("rowid")) {
   tmp1 <- ms$rowinfo
   tmp2 <- ms$values
   r  <- prcomp(x = tmp2, retx = TRUE, center = T, scale = T, rank. = 12)
@@ -716,64 +1009,100 @@ plot_pca <- function(ms, color_labels=c("AGE_YEARS", "BATCH")) {
 
 #' Plot intensity vs injection order
 #'
-#' @param ms
-#' @param standards
+#' @param ms List object of value and meta data
+#' @param standards vector containing column names of internal standards
 #' Feature names of standards
 #'
-#' @return
+#' @return ggplot2 plot
 #' @export
 #'
-#' @import tidyverse
+#' @import dplyr
+#' @import ggplot2
+#' @import tidyr
+#'
 #'
 #' @examples
+#' # First convert the pneumonia object to a tibble.
+#' pneumonia<- tibble::tibble(pneumonia)
+#'
+#' # Generate list object
+#' ms <- list()
+#'
+#' # Assign feature values to ms$values
+#' start_column <- 8 # The first column with feature values
+#' end_column <- ncol(pneumonia) # The last column of the dataset
+#' ms$values <- pneumonia[, start_column:end_column] %>% dplyr::slice(1:10)
+#'
+#' # Assign metadata to ms$rowinfo
+#' ms$rowinfo <- pneumonia %>% dplyr::select(id, group, age, gender, weight, height, BMI) %>% dplyr::slice(1:10) %>% dplyr::mutate(rowid = dplyr::row_number())
+#' ms <- impute_zero(ms)
+#' plot_standards(ms, standards = c("M363T419","M512T603","M364T419","M365T392", "M143T177"))
 plot_standards <- function(ms, standards) {
   values <- ms$values
   info   <- ms$rowinfo
 
   plot_data <-
     values %>%
-    select(all_of(standards)) %>%
-    bind_cols(info) %>%
-    pivot_longer(cols = all_of(standards)) %>%
-    mutate(batch = as.factor(as.numeric(as.factor(BATCH)) %% 2))
+   dplyr::select(dplyr::all_of(standards)) %>%
+    dplyr::bind_cols(info) %>%
+    tidyr::pivot_longer(cols = dplyr::all_of(standards)) %>%
+    dplyr::mutate(batch = as.factor(as.numeric(as.factor(BATCH)) %% 2))
 
   p <-
-    ggplot(plot_data) +
-    geom_point(aes(y=value, x=rowid, fill = batch, color = batch), shape = 21, show.legend = F)+
-    facet_wrap(~name, ncol = 1) +
-    scale_fill_manual(values = c("#ffffcc", "#41b6c4"))+
-    scale_color_manual(values = c("#7fcdbb","#225ea8")) +
-    theme_classic()
+    ggplot2::ggplot(plot_data) +
+    ggplot2::geom_point(ggplot2::aes(y=value, x=rowid, fill = batch, color = batch), shape = 21, show.legend = F)+
+    ggplot2::facet_wrap(~name, ncol = 1) +
+    ggplot2::scale_fill_manual(values = c("#ffffcc", "#41b6c4"))+
+    ggplot2::scale_color_manual(values = c("#7fcdbb","#225ea8")) +
+    ggplot2::theme_classic()
   NULL
 
   return(p)
 }
 
 
-#' UMAP of data
+#' UMAP of data (beta)
 #'
-#' @param tmp1
-#' @param tmp2
-#' @param color_label
+#' @param tmp1 metadata
+#' @param tmp2 valuedata
+#' @param color_label coloring variable
 #'
-#' @return
+#' @return ggplot2 plot
 #' @export
-#' @import tidyverse
+#' @import ggplot2
+#' @import dplyr
 #' @import umap
 #' @examples
+#' # First convert the pneumonia object to a tibble.
+#' pneumonia<- tibble::tibble(pneumonia)
+#'
+#' # Generate list object
+#' ms <- list()
+#'
+#' # Assign feature values to ms$values
+#' start_column <- 8 # The first column with feature values
+#' end_column <- ncol(pneumonia) # The last column of the dataset
+#' ms$values <- pneumonia[, start_column:end_column] %>% dplyr::slice(1:100)
+#'
+#' # Assign metadata to ms$rowinfo
+#' ms$rowinfo <- pneumonia %>% dplyr::select(id, group, age, gender, weight, height, BMI) %>% dplyr::slice(1:100) %>% dplyr::mutate(rowid = dplyr::row_number())
+#' ms <- impute_zero(ms)
+#' tmp1 <- ms$rowinfo
+#' tmp2 <- ms$values
+#' make_umap(tmp1, tmp2, color_label = "group")
 make_umap <- function(tmp1, tmp2, color_label) {
   r <- umap::umap(tmp2)
-  o <- tibble("umap1"=r$layout[,1],
+  o<- tibble::tibble("umap1"=r$layout[,1],
               "umap2"=r$layout[,2])
   pd <- o %>%
-    bind_cols(tmp1) %>%
+    dplyr::bind_cols(tmp1) %>%
     {.}
 
-  p <- ggplot(pd,aes(x=umap1, y=umap2,
+  p <- ggplot2::ggplot(pd,ggplot2::aes(x=umap1, y=umap2,
                      fill=.data[[color_label]]))+
-    geom_point(shape=21, color="#FFFFFFFF", size=3, show.legend = F) +
-    labs(fill = color_label)+
-    theme() +
+    ggplot2::geom_point(shape=21, color="#FFFFFFFF", size=3, show.legend = F) +
+    ggplot2::labs(fill = color_label)+
+    ggplot2::theme() +
     NULL
   return(p)
 }
@@ -781,46 +1110,44 @@ make_umap <- function(tmp1, tmp2, color_label) {
 
 #' probability histogram of caret model
 #'
-#' @param model
-#'
-#' @return
+#' @param model the caret model trained on the ms list
+#' @import ggplot2
+#' @return ggplot2 plot
 #' @export
-#' @import tidyverse
-#' @examples
+#' @import ggplot2
 probs_hist <- function(model){
   classes <- unique(model_cv_r$obs)
-  ggplot(data = model$pred %>% tibble::as_tibble()) +
-    geom_histogram(
+  ggplot2::ggplot(data = model$pred %>% tibble::as_tibble()) +
+    ggplot2::geom_histogram(
       breaks = seq(0,1,length.out = 100),
       color = "gray20",
       alpha = 0.4,
-      aes_string(x=as.character(classes[2]), fill="obs"),
+      ggplot2::aes_string(x=as.character(classes[2]), fill="obs"),
       position = "identity"
     ) +
-    theme_minimal()+
-    scale_fill_manual(values = c("#d53e4f", "#3288bd"))+
-    labs(title = best_model)
+    ggplot2::theme_minimal()+
+    ggplot2::scale_fill_manual(values = c("#d53e4f", "#3288bd"))+
+    ggplot2::labs(title = best_model)
 }
 
 
 #' ROC of caret model
 #'
-#' @param model
-#'
-#' @return
+#' @param model the caret model trained on the ms list
+#' @import plotROC
+#' @import ggplot2
+#' @return ggplot2 plot
 #' @export
-#'
-#' @examples
 plot_roc <- function(model){
   # ROC CURVE - ALL MODELS
   classes <- unique(model_cv_r$obs)
-  g <- ggplot(model$pred,
-              aes_string(m=classes[1],
+  g <- ggplot2::ggplot(model$pred,
+                       ggplot2::aes_string(m=classes[1],
                          d=factor("obs", levels = c(as.character(classes[1]), as.character(classes[2]))),
                          color = "model")
   ) +
-    geom_roc(n.cuts=0) +
-    coord_equal() +
+    plotROC::geom_roc(n.cuts=0) +
+    ggplot2::coord_equal() +
     style_roc()
 
   g +
@@ -830,46 +1157,48 @@ plot_roc <- function(model){
 
 #' Importance from caret model
 #'
-#' @param model
+#' @param model the caret model trained on the ms list
 #'
-#' @return
+#' @return ggplot2 plot
 #' @export
-#' @import tidyverse
+#' @import dplyr
+#' @import tibble
+#' @import tidyr
+#' @import ggplot2
 #' @import caret
-#' @examples
 plot_importance <- function(model){
 
   # FEATURE IMPORTANCE - BEST MODEL
-  importance <- varImp(model) %>%
+  importance <- caret::varImp(model) %>%
     {
-      tibble(Feature = rownames(.$importance),
+      tibble::tibble(Feature = rownames(.$importance),
              Importance = .$importance %>% unlist %>% round(2)) %>%
-        arrange(desc(Importance))
+        dplyr::arrange(-Importance)
     }
 
 
   importance[1:10,] %>%
-    ggplot(aes(y=factor(Feature, levels = rev(importance$Feature)), x=Importance)) +
-    geom_col()+
-    labs(y = "Features")+
-    theme_minimal()
+    ggplot2::ggplot(ggplot2::aes(y=factor(Feature, levels = rev(importance$Feature)), x=Importance)) +
+    ggplot2::geom_col()+
+    ggplot2::labs(y = "Features")+
+    ggplot2::theme_minimal()
 
-  important <- importance %>% filter(Importance>5) %>% arrange(-Importance) %>% slice(1:25)
+  important <- importance %>% dplyr::filter(Importance>5) %>% dplyr::arrange(-Importance) %>% dplyr::slice(1:25)
 
 
 
-  outcome <- model %>% select(obs, rowIndex) %>% distinct() %>% arrange(rowIndex)
+  outcome <- model %>% dplyr::select(obs, rowIndex) %>% dplyr::distinct() %>% dplyr::arrange(rowIndex)
 
   outcome %>%
     tibble::as_tibble() %>%
-    bind_cols(model$trainingData) %>%
-    select(obs, all_of(important$Feature)) %>%
-    filter(!is.na(obs)) %>%
-    pivot_longer(names_to = "Feature", cols=-obs) %>%
-    ggplot() +
-    geom_boxplot(aes(x=obs, y=value), fill = "#6DA398", show.legend = F)+
-    facet_wrap(~Feature, scales = "free_y")+
-    theme_bw()
+    dplyr::bind_cols(model$trainingData) %>%
+    dplyr::select(obs, all_of(important$Feature)) %>%
+    dplyr::filter(!is.na(obs)) %>%
+    tidyr::pivot_longer(names_to = "Feature", cols=-obs) %>%
+    ggplot2::ggplot() +
+    ggplot2::geom_boxplot(ggplot2::aes(x=obs, y=value), fill = "#6DA398", show.legend = F)+
+    ggplot2::facet_wrap(~Feature, scales = "free_y")+
+    ggplot2::theme_bw()
 }
 
 
@@ -877,26 +1206,25 @@ plot_importance <- function(model){
 #'
 #' Used when classifying over a continuous variable
 #'
-#' @param model
-#' @param target_info
-#' @param var_name
-#'
-#' @return
+#' @param model the caret model trained on the ms list
+#' @param target_info outcome variable
+#' @param var_name outcome variable
+#' @import dplyr
+#' @import ggplot2
+#' @return NULL
 #' @export
-#'
-#' @examples
 prob_vs_continuous <- function(model, target_info, var_name){
   pdata <-
     model$pred %>%
-    arrange(rowIndex) %>%
-    mutate(rowid = rowIndex) %>%
-    inner_join(target_info %>% drop_na() %>% mutate(rowid = row_number()), by = "rowid")
+    dplyr::arrange(rowIndex) %>%
+    dplyr::mutate(rowid = rowIndex) %>%
+    dplyr::inner_join(target_info %>% dplyr::drop_na() %>% dplyr::mutate(rowid = dplyr::row_number()), by = "rowid")
 
   classes <- unique(model_cv_r$obs)
 
-  ggplot(pdata, aes_string(y=classes[1], x = var_name, fill = "obs")) +
-    geom_point(shape = 21, color = "white") +
-    scale_fill_manual(values = c("#d53e4f", "#3288bd"))+
-    geom_segment(aes(x = min(age), xend = max(age), y=0.5, yend = 0.5), color = "black", linetype = "dashed")
+  ggplot2::ggplot(pdata, ggplot2::aes_string(y=classes[1], x = var_name, fill = "obs")) +
+    ggplot2::geom_point(shape = 21, color = "white") +
+    ggplot2::scale_fill_manual(values = c("#d53e4f", "#3288bd"))+
+    ggplot2::geom_segment(aes(x = min(age), xend = max(age), y=0.5, yend = 0.5), color = "black", linetype = "dashed")
 }
 

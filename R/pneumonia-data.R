@@ -2,10 +2,11 @@
 #'
 #' Autopsies of pneumonia cases vs controls.
 #'
+#' @name pneumonia
 #'
 #' @docType data
 #'
-#' @usage data(pneumonia)
+#' @usage pneumonia
 #'
 #' @format An object of class \code{"tbl"}
 #'

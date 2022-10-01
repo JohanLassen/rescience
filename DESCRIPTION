@@ -2,21 +2,29 @@ Package: rescience
 Title: Reprocucible Science
 Version: 0.0.0.9000
 Authors@R: person('Johan', 'Lassen', email = 'johanlassen@live.dk', role = c('cre', 'aut'))
-Description: Making machine learning reproducible
+Description: 
+    Making machine learning results reproducible. This package spans over the data processing from the peak table to feature importance analysis. 
+    Reproducibility is highly correlated with estimated uncertainty and the quality of the identified biomarkers. By use of cross validation and robust
+    statistics we aim to make the result reproducible in future studies.
 License: MIT + file LICENSE
 Imports: 
     caret (>= 6.0.92),
     config (>= 0.3.1),
+    cowplot,
     dplyr (>= 1.0.9),
     ggplot2 (>= 3.3.6),
     glmnet,
     golem (>= 0.3.3),
     magrittr (>= 2.0.3),
+    plotROC,
     purrr (>= 0.3.4),
     shiny (>= 1.7.2),
+    tibble,
+    tidyr,
+    umap,
     vroom
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.1.1
+RoxygenNote: 7.2.1
 Depends: 
     R (>= 2.10)
