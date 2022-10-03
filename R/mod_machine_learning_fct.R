@@ -1,15 +1,14 @@
 
 
-#' Title
+#' Model screening
 #'
-#' @param ms
-#' @param methods
-#' @param outcome
-#' @param tech_rep
+#' @param ms ms list object containing value and meta data
+#' @param methods machine learning methods to fit
+#' @param outcome outcome variable to predict
+#' @param tech_rep makes sure technical replicates end up together in hold out data to prevent data leakage
 #'
-#' @return
+#' @return list of caret models
 #'
-#' @examples
 model_screening <-
   function(ms, methods, outcome, tech_rep = NULL){
     print(methods)
@@ -27,12 +26,12 @@ model_screening <-
 
 #' Matthews Correlation Coefficient
 #'
-#' @param pred
-#' @param obs
+#' The mcc value is robust to skewed outcome distributions and always represent the amount of information extracted by the model.
 #'
-#' @return
+#' @param pred predictions from any model
+#' @param obs observed outcome values
 #'
-#' @examples
+#' @return mcc score
 mcc <-
   function(pred, obs){
     cm  <- table(pred, obs) / 100 #confusion matrix
@@ -49,14 +48,12 @@ mcc <-
 
 #' Fit models
 #' Use several different model types to predict on the x and y
-#' @param x
-#' @param y
-#' @param methods
-#'
-#' @return
+#' @param x value data (matrix, df, or tibble)
+#' @param y outcome variable (vector)
+#' @param methods machine learning models
+#' @import caret glmnet ranger
+#' @return list of caret models
 #' @export
-#'
-#' @examples
 fit_models <- function(x, y, methods = c("glmnet", "pls")){
   x <- as.matrix(x)
   print(x[1:100, 1:100])
@@ -78,6 +75,15 @@ fit_models <- function(x, y, methods = c("glmnet", "pls")){
   return(fits)
 }
 
+
+
+#' Extracts performance from list of caret models
+#'
+#' @param fits list of caret models
+#'
+#' @return data frame of accuracy and mcc (classification metrics)
+#' @export
+#'
 get_performance <-
   function(fits){
     predictions <-

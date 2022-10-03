@@ -4,10 +4,14 @@
 \alias{rm_sample_min_batch_occurence}
 \title{Removes observations if their batches are below a given threshold}
 \usage{
-rm_sample_min_batch_occurence(ms, min_occurence = 5)
+rm_sample_min_batch_occurence(ms, min_occurence = 5, batch = NULL)
 }
 \arguments{
 \item{ms}{List object containing value data and rowinfo data (meta data)}
+
+\item{min_occurence}{the minimum number of samples per batch (to avoid batch effect being predictive for the outcome)}
+
+\item{batch}{Column name of the batch info column}
 }
 \value{
 ms

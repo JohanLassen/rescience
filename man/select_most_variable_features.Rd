@@ -2,17 +2,23 @@
 % Please edit documentation in R/mod_preprocess_fct.R
 \name{select_most_variable_features}
 \alias{select_most_variable_features}
-\title{dplyr::select top n most variable features}
+\title{Select most variable features (beta version)
+Only works with features starting with "M" as in M314T182 (untargeted data)
+Effective for model screening to avoid heavy work loads. Often top 500 contains most of the signal.}
 \usage{
 select_most_variable_features(ms, n = 500)
 }
 \arguments{
 \item{ms}{List object containing value data and rowinfo data (meta data)}
+
+\item{n}{the number of most variable features selected}
 }
 \value{
 ms
 }
 \description{
+Select most variable features (beta version)
+Only works with features starting with "M" as in M314T182 (untargeted data)
 Effective for model screening to avoid heavy work loads. Often top 500 contains most of the signal.
 }
 \examples{
@@ -30,7 +36,7 @@ ms$values <- pneumonia[, start_column:end_column] \%>\% dplyr::slice(1:10)
 # Assign metadata to ms$rowinfo
 ms$rowinfo <- pneumonia \%>\% dplyr::select(id, group, age, gender, weight, height, BMI) \%>\% dplyr::slice(1:10) \%>\% dplyr::mutate(rowid = dplyr::row_number())
 ms <- impute_zero(ms)
-ms <-dplyr::select_most_variable_features(ms, n=10)
+ms <-select_most_variable_features(ms, n=10)
 head(ms$values)
 head(ms$rowinfo)
 

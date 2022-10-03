@@ -1,4 +1,10 @@
 
+#' Utility function for waveICA
+#'
+#' @param X values
+#' @param k number of components
+#' @param alpha tradeoff between spatial ICA and temporal ICA
+#' @return components
 unbiased_stICA <- function(X,k=10,alpha) {
 
   #
@@ -40,9 +46,6 @@ unbiased_stICA <- function(X,k=10,alpha) {
   #  J.-F. Cardoso and A. Souloumiac, 'Jacobi angles for simultaneous diagonalization',
   #  SIAM J. Mat. Anal. Appl., vol 17(1), pp. 161-164, 1995
 
-  library(JADE)
-  library(corpcor)
-
   jadeCummulantMatrices <- function(X) {
     # calcs the n(n+1)/2 cum matrices used in JADE, see A. Cichocki and S. Amari. Adaptive blind signal and image
     # processing. John Wiley & Sons, 2002. book, page 173
@@ -66,7 +69,7 @@ unbiased_stICA <- function(X,k=10,alpha) {
     scale <- matrix(1,n,1)/t  # for convenience
 
 
-    R <- cov(t(X)) # covariance
+    R <- stats::cov(t(X)) # covariance
 
     k <- 1
     for (p in 1:n){
@@ -145,7 +148,7 @@ unbiased_stICA <- function(X,k=10,alpha) {
 
 
   # Joint diagonalization
-  Worth <- rjd(M,eps = 1e-06, maxiter = 1000);
+  Worth <- JADE::rjd(M,eps = 1e-06, maxiter = 1000);
   Wo <-t (Worth$V);
 
 
@@ -160,8 +163,8 @@ unbiased_stICA <- function(X,k=10,alpha) {
   meanCol <- matrix(colMeans(X,dims=1),ncol =1); # spatial means
   meanRows <- matrix(rowMeans(X,dims=1),ncol = 1); # temporal means
 
-  meanB <- pseudoinverse(A0) %*% (meanRows);
-  meanA <- pseudoinverse(B0) %*% (meanCol);
+  meanB <- corpcor::pseudoinverse(A0) %*% (meanRows);
+  meanA <- corpcor::pseudoinverse(B0) %*% (meanCol);
 
   Bfin <- B0 + matrix(rep(meanB,n),nrow = n,byrow=T)
   Afin <- A0 + matrix(rep(meanA,p),nrow = p,byrow=T)

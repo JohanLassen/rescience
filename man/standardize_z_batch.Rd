@@ -4,10 +4,12 @@
 \alias{standardize_z_batch}
 \title{Z-standardization of batches}
 \usage{
-standardize_z_batch(ms, batch_column = "BATCH")
+standardize_z_batch(ms, batch_column = NULL)
 }
 \arguments{
 \item{ms}{List object containing value and meta data}
+
+\item{batch_column}{Column name of batch info}
 }
 \value{
 ms

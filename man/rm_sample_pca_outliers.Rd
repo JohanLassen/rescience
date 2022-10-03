@@ -8,6 +8,8 @@ rm_sample_pca_outliers(ms, plot = FALSE)
 }
 \arguments{
 \item{ms}{List object containing value data and rowinfo data (meta data)}
+
+\item{plot}{set to TRUE to visualize the removed samples}
 }
 \value{
 ms

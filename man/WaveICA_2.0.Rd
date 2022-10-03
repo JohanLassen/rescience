@@ -28,24 +28,6 @@ A list that contains the clean data.
 Removing batch effects for metabolomics data without
 using batch information
 }
-\examples{
-\dontrun{
-## load the demo data
-data(Amide_data, package = "WaveICA")
-### Data management for original data
-Amide_data_order <- Amide_data[order(Amide_data$Injection_order),]
-data_Amide_order <- Amide_data_order[,-c(1:3)]
-### Generating group and batch
-Amide_data_order$group[Amide_data_order$group=="QC"] <- 2
-group_zong_Amide<-as.numeric(Amide_data_order$group)
-Injection_order<-Amide_data_order$Injection_order
-############### run WaveICA2.0
-data_wave2.0_reconstruct_Amide <- WaveICA_2.0(data=data_Amide_order,Injection_Order=Injection_order,alpha=0,Cutoff=0.1,K=10)
-data_Amide_zong_wave2.0 <- data_wave2.0_reconstruct_Amide$data_wave
-data_Amide_sample_wave2.0 <- data_Amide_zong_wave2.0[group_zong_Amide!=2,]
-data_Amide_qc_wave2.0<-data_Amide_zong_wave2.0[group_zong_Amide==2,]
-}
-}
 \author{
 Kui Deng
 \email{dengkui_stat@163.com}

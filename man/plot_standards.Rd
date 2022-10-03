@@ -4,13 +4,15 @@
 \alias{plot_standards}
 \title{Plot intensity vs injection order}
 \usage{
-plot_standards(ms, standards)
+plot_standards(ms, standards, batch = NULL)
 }
 \arguments{
 \item{ms}{List object of value and meta data}
 
 \item{standards}{vector containing column names of internal standards
 Feature names of standards}
+
+\item{batch}{column name of batch info}
 }
 \value{
 ggplot2 plot

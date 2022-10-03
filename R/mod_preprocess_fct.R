@@ -244,7 +244,7 @@ impute_knn <- function(ms){
 #' This might help avoiding batch effect and identification of batches through signals with binary (on/off) behaviour
 #'
 #' @param ms List object containing value data and rowinfo data (meta data)
-#'
+#' @param batch column name of batch. If none provided the dataset is considered as one large batch.
 #' @return ms
 #' @export
 #' @importFrom magrittr %>%
@@ -266,12 +266,19 @@ impute_knn <- function(ms){
 #' head(ms$values)
 #' head(ms$rowinfo)
 
-rm_feature_batch_inflated_zeros <- function(ms){
+rm_feature_batch_inflated_zeros <- function(ms, batch = NULL){
 
   raw     <- ms$values
   rowinfo <- ms$rowinfo
 
+  if (is.null(batch)){
+    BATCH = 1
+  } else{
+    BATCH = rowinfo[[batch]]
+  }
+
   tmp1 <- rowinfo %>%
+    dplyr::mutate(BATCH = BATCH) %>%
     dplyr::select(BATCH) %>%
     dplyr::bind_cols(raw) %>%
     tidyr::pivot_longer(cols = starts_with("M")) %>%
@@ -294,7 +301,8 @@ rm_feature_batch_inflated_zeros <- function(ms){
 #' Is usable if preceeded by batch normalization
 #'
 #' @param ms List object containing value data and rowinfo data (meta data)
-#'
+#' @param min_occurence the minimum number of samples per batch (to avoid batch effect being predictive for the outcome)
+#' @param batch Column name of the batch info column
 #' @return ms
 #' @export
 #' @importFrom magrittr %>%
@@ -319,18 +327,26 @@ rm_feature_batch_inflated_zeros <- function(ms){
 #' head(ms$rowinfo)
 
 
-rm_sample_min_batch_occurence <- function(ms, min_occurence = 5){
+rm_sample_min_batch_occurence <- function(ms, min_occurence = 5, batch = NULL){
 
-  tmp1 <- ms$rowinfo
-  tmp2 <- ms$values
+  rowinfo <- ms$rowinfo
+  values <- ms$values
 
-  small_batches <- table(tmp1$BATCH)[table(tmp1$BATCH) < min_occurence] %>% names
-  tmp1 <- tmp1 %>% dplyr::filter(!BATCH %in% small_batches)
-  tmp2 <- tmp2[tmp1$rowid,]
-  tmp1 <- tmp1 %>% dplyr::mutate(rowid = dplyr::row_number())
 
-  ms$rowinfo <- tmp1
-  ms$values <- tmp2
+  if (is.null(batch)){
+    BATCH = 1
+  } else{
+    BATCH = rowinfo[[batch]]
+  }
+
+
+  small_batches <- table(rowinfo$BATCH)[table(rowinfo$BATCH) < min_occurence] %>% names
+  rowinfo <- rowinfo %>% dplyr::filter(!BATCH %in% small_batches)
+  values <- values[rowinfo$rowid,]
+  rowinfo <- rowinfo %>% dplyr::mutate(rowid = dplyr::row_number())
+
+  ms$rowinfo <- rowinfo
+  ms$values <- values
 
   return(ms)
 }
@@ -344,7 +360,7 @@ rm_sample_min_batch_occurence <- function(ms, min_occurence = 5){
 #' May be applied before row normalization but after removal of extreme features.
 #'
 #' @param ms List object containing value data and rowinfo data (meta data)
-#'
+#' @param plot set to TRUE to visualize the removed samples
 #' @return ms
 #' @export
 #' @importFrom magrittr %>%
@@ -384,11 +400,12 @@ rm_sample_pca_outliers <- function(ms, plot = FALSE) {
 
   tmp1 <- tmp1 %>%
     dplyr::left_join(bad_rows) %>%
-    dplyr::mutate(n=ifelse(is.na(n), 0,n)) %>%
-    dplyr::mutate(label=dplyr::case_when(
-      n>0 ~ sample,
-      n==0 ~ "")) %>%
-    {.}
+    dplyr::mutate(n=ifelse(is.na(n), 0,n))
+  # %>%
+  #   dplyr::mutate(label=dplyr::case_when(
+  #     n>0 ~ rowid,
+  #     n==0 ~ "")) %>%
+  #   {.}
 
   pd <- r$x %>%
     tibble::as_tibble() %>%
@@ -406,7 +423,7 @@ rm_sample_pca_outliers <- function(ms, plot = FALSE) {
       xvar <- names(pd)[2*i-1]
       yvar <- names(pd)[2*i]
       p1 <- ggplot2::ggplot(pd,ggplot2::aes(x=!!ensym(xvar), y=!!ensym(yvar),
-                          fill=response, label=label))+
+                          fill=response))+
         ggplot2::geom_point(shape=21, color="#FFFFFFFF", size=3) +
         ggplot2::scale_fill_manual(values = c("#D0D0D0", "#D04040")) +
         ggplot2::theme(legend.position="none") +
@@ -460,13 +477,13 @@ rm_sample_pca_outliers <- function(ms, plot = FALSE) {
 #' end_column <- ncol(pneumonia) # The last column of the dataset
 #' ms$values <- pneumonia[, start_column:end_column] %>% dplyr::slice(1:10)
 #' # Assign metadata to ms$rowinfo
-#' ms$rowinfo <-
-#'     pneumonia %>%
+#' ms$rowinfo <- pneumonia %>%
 #'     dplyr::select(id, group, age, gender, weight, height, BMI) %>%
 #'     dplyr::slice(1:10) %>%
 #'     dplyr::mutate(rowid = dplyr::row_number())
 #' ms <- impute_zero(ms)
 #' ms <- rm_IS_outliers(ms, standards = c("M363T419","M512T603","M364T419","M365T392", "M143T177"), tolerance = 4, quantiles = c(0.01, 0.99))
+#'
 rm_IS_outliers <- function(ms, standards, tolerance = 0, quantiles = c(0.025, 0.975)){
   tmp1 <- ms$rowinfo
   tmp2 <- ms$values
@@ -809,12 +826,12 @@ normalize_limma_cyclicloess <- function(ms){
 }
 
 
-#'dplyr::select top n most variable features
-#'
+#' Select most variable features (beta version)
+#' Only works with features starting with "M" as in M314T182 (untargeted data)
 #' Effective for model screening to avoid heavy work loads. Often top 500 contains most of the signal.
 #'
 #' @param ms List object containing value data and rowinfo data (meta data)
-#'
+#' @param n the number of most variable features selected
 #' @return ms
 #' @export
 #' @importFrom magrittr %>%
@@ -835,7 +852,7 @@ normalize_limma_cyclicloess <- function(ms){
 #' # Assign metadata to ms$rowinfo
 #' ms$rowinfo <- pneumonia %>% dplyr::select(id, group, age, gender, weight, height, BMI) %>% dplyr::slice(1:10) %>% dplyr::mutate(rowid = dplyr::row_number())
 #' ms <- impute_zero(ms)
-#' ms <-dplyr::select_most_variable_features(ms, n=10)
+#' ms <-select_most_variable_features(ms, n=10)
 #' head(ms$values)
 #' head(ms$rowinfo)
 #'
@@ -868,7 +885,7 @@ select_most_variable_features <- function(ms, n=500) {
 #'
 #'
 #' @param ms List object containing value and meta data
-#'
+#' @param batch_column Column name of batch info
 #' @return ms
 #' @export
 #' @importFrom magrittr %>%
@@ -893,11 +910,17 @@ select_most_variable_features <- function(ms, n=500) {
 #' head(ms$values)
 #' head(ms$rowinfo)
 #'
-standardize_z_batch <- function(ms, batch_column = "BATCH") {
+standardize_z_batch <- function(ms, batch_column = NULL) {
   raw <- ms$values
   target_info <- ms$rowinfo
 
-  tmp1<- tibble::tibble(batch = target_info[[batch_column]], rowid = target_info$rowid) %>%
+  if (is.null(batch_column)){
+    batch = rep(1, length(target_info$rowid))
+  } else{
+    batch = target_info[[batch_column]]
+  }
+
+  tmp1<- tibble::tibble(batch = batch, rowid = target_info$rowid) %>%
     dplyr::bind_cols(tibble::as_tibble(raw)) %>%
     tidyr::pivot_longer(names_to = "compound", values_to = "value",  cols= c(-batch, -rowid))
 
@@ -1012,6 +1035,7 @@ plot_pca <- function(ms, color_labels=c("rowid")) {
 #' @param ms List object of value and meta data
 #' @param standards vector containing column names of internal standards
 #' Feature names of standards
+#' @param batch column name of batch info
 #'
 #' @return ggplot2 plot
 #' @export
@@ -1037,9 +1061,15 @@ plot_pca <- function(ms, color_labels=c("rowid")) {
 #' ms$rowinfo <- pneumonia %>% dplyr::select(id, group, age, gender, weight, height, BMI) %>% dplyr::slice(1:10) %>% dplyr::mutate(rowid = dplyr::row_number())
 #' ms <- impute_zero(ms)
 #' plot_standards(ms, standards = c("M363T419","M512T603","M364T419","M365T392", "M143T177"))
-plot_standards <- function(ms, standards) {
+plot_standards <- function(ms, standards, batch = NULL) {
   values <- ms$values
   info   <- ms$rowinfo
+
+  if (is.null(batch)){
+    BATCH = 1
+  } else{
+    BATCH = info[[batch]]
+  }
 
   plot_data <-
     values %>%
@@ -1071,7 +1101,6 @@ plot_standards <- function(ms, standards) {
 #' @export
 #' @import ggplot2
 #' @import dplyr
-#' @import umap
 #' @examples
 #' # First convert the pneumonia object to a tibble.
 #' pneumonia<- tibble::tibble(pneumonia)

@@ -7,8 +7,13 @@
 mcc(pred, obs)
 }
 \arguments{
-\item{obs}{}
+\item{pred}{predictions from any model}
+
+\item{obs}{observed outcome values}
+}
+\value{
+mcc score
 }
 \description{
-Matthews Correlation Coefficient
+The mcc value is robust to skewed outcome distributions and always represent the amount of information extracted by the model.
 }

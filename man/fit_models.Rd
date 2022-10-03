@@ -8,7 +8,14 @@ Use several different model types to predict on the x and y}
 fit_models(x, y, methods = c("glmnet", "pls"))
 }
 \arguments{
-\item{methods}{}
+\item{x}{value data (matrix, df, or tibble)}
+
+\item{y}{outcome variable (vector)}
+
+\item{methods}{machine learning models}
+}
+\value{
+list of caret models
 }
 \description{
 Fit models

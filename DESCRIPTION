@@ -18,13 +18,20 @@ Imports:
     magrittr (>= 2.0.3),
     plotROC,
     purrr (>= 0.3.4),
+    ranger,
     shiny (>= 1.7.2),
     tibble,
     tidyr,
+    vroom,
+Suggests:
     umap,
-    vroom
+    ica,
+    JADE,
+    waveslim,
+    corpcor
 Encoding: UTF-8
 LazyData: true
+LazyDataCompression: xz
 RoxygenNote: 7.2.1
 Depends: 
     R (>= 2.10)

@@ -4,10 +4,12 @@
 \alias{rm_feature_batch_inflated_zeros}
 \title{Remove features inflated with zeros (batch-wise)}
 \usage{
-rm_feature_batch_inflated_zeros(ms)
+rm_feature_batch_inflated_zeros(ms, batch = NULL)
 }
 \arguments{
 \item{ms}{List object containing value data and rowinfo data (meta data)}
+
+\item{batch}{column name of batch. If none provided the dataset is considered as one large batch.}
 }
 \value{
 ms
