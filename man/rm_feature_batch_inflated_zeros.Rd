@@ -25,9 +25,9 @@ ms <- list()
 # Assign feature values to ms$values
 start_column <- 8 # The first column with feature values
 end_column <- ncol(pneumonia) # The last column of the dataset
-ms$values <- pneumonia[, start_column:end_column] \%>\% dplyr::slice(1:10)
+ms$values <- pneumonia[1:10, start_column:end_column]
 # Assign metadata to ms$rowinfo
-ms$rowinfo <- pneumonia \%>\% dplyr::select(id, group, age, gender, weight, height, BMI) \%>\% dplyr::slice(1:10) \%>\% dplyr::mutate(rowid = dplyr::row_number())
+ms$rowinfo <- pneumonia[1:10,] \%>\% dplyr::select(rowid = id, group, age, gender)
 ms <- impute_zero(ms)
 ms <- rm_feature_batch_inflated_zeros(ms)
 head(ms$values)

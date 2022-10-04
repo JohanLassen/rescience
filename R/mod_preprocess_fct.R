@@ -76,10 +76,10 @@ normalize <- function(ms, method){
 #' # Assign feature values to ms$values
 #' start_column <- 8 # The first column with feature values
 #' end_column <- ncol(pneumonia) # The last column of the dataset
-#' ms$values <- pneumonia[, start_column:end_column] %>% dplyr::slice(1:10)
+#' ms$values <- pneumonia[1:10, start_column:end_column]
 #'
 #' # Assign metadata to ms$rowinfo
-#' ms$rowinfo <- pneumonia %>% dplyr::select(id, group, age, gender, weight, height, BMI) %>% dplyr::slice(1:10) %>% dplyr::mutate(rowid = dplyr::row_number())
+#' ms$rowinfo <- pneumonia[1:10,] %>% dplyr::select(rowid = id, group, age, gender)
 #' ms <- transform_fourth_root(ms)
 #' head(ms$values)
 #' head(ms$rowinfo)
@@ -108,10 +108,10 @@ transform_fourth_root <- function(ms){
 #' # Assign feature values to ms$values
 #' start_column <- 8 # The first column with feature values
 #' end_column <- ncol(pneumonia) # The last column of the dataset
-#' ms$values <- pneumonia[, start_column:end_column] %>% dplyr::slice(1:10)
+#' ms$values <- pneumonia[1:10, start_column:end_column]
 #'
 #' # Assign metadata to ms$rowinfo
-#' ms$rowinfo <- pneumonia %>% dplyr::select(id, group, age, gender, weight, height, BMI) %>% dplyr::slice(1:10) %>% dplyr::mutate(rowid = dplyr::row_number())
+#' ms$rowinfo <- pneumonia[1:10,] %>% dplyr::select(rowid = id, group, age, gender)
 #' ms <- transform_log(ms)
 #' head(ms$values)
 #' head(ms$rowinfo)
@@ -138,10 +138,10 @@ transform_log <- function(ms){
 #' # Assign feature values to ms$values
 #' start_column <- 8 # The first column with feature values
 #' end_column <- ncol(pneumonia) # The last column of the dataset
-#' ms$values <- pneumonia[, start_column:end_column] %>% dplyr::slice(1:10)
+#' ms$values <- pneumonia[1:10, start_column:end_column]
 #'
 #' # Assign metadata to ms$rowinfo
-#' ms$rowinfo <- pneumonia %>% dplyr::select(id, group, age, gender, weight, height, BMI) %>% dplyr::slice(1:10) %>% dplyr::mutate(rowid = dplyr::row_number())
+#' ms$rowinfo <- pneumonia[1:10,] %>% dplyr::select(rowid = id, group, age, gender)
 #' ms <- impute_zero(ms)
 #' head(ms$values)
 #' head(ms$rowinfo)
@@ -168,10 +168,10 @@ impute_zero <- function(ms){
 #' # Assign feature values to ms$values
 #' start_column <- 8 # The first column with feature values
 #' end_column <- ncol(pneumonia) # The last column of the dataset
-#' ms$values <- pneumonia[, start_column:end_column] %>% dplyr::slice(1:10)
+#' ms$values <- pneumonia[1:10, start_column:end_column]
 #'
 #' # Assign metadata to ms$rowinfo
-#' ms$rowinfo <- pneumonia %>% dplyr::select(id, group, age, gender, weight, height, BMI) %>% dplyr::slice(1:10) %>% dplyr::mutate(rowid = dplyr::row_number())
+#' ms$rowinfo <- pneumonia[1:10,] %>% dplyr::select(rowid = id, group, age, gender)
 #' ms <- impute_knn(ms)
 #' head(ms$values)
 #' head(ms$rowinfo)
@@ -215,10 +215,10 @@ impute_knn <- function(ms){
 # #' # Assign feature values to ms$values
 # #' start_column <- 8 # The first column with feature values
 # #' end_column <- ncol(pneumonia) # The last column of the dataset
-# #' ms$values <- pneumonia[, start_column:end_column] %>% dplyr::slice(1:10)
+# #' ms$values <- pneumonia[1:10, start_column:end_column]
 # #'
 # #' # Assign metadata to ms$rowinfo
-# #' ms$rowinfo <- pneumonia %>% dplyr::select(id, group, age, gender, weight, height, BMI) %>% dplyr::slice(1:10) %>% dplyr::mutate(rowid = dplyr::row_number())
+# #' ms$rowinfo <- pneumonia[1:10,] %>% dplyr::select(rowid = id, group, age, gender)
 # #' ms <- impute_zero(ms)
 # #' ms <- impute_RF(ms)
 # #' head(ms$values)
@@ -258,9 +258,9 @@ impute_knn <- function(ms){
 #' # Assign feature values to ms$values
 #' start_column <- 8 # The first column with feature values
 #' end_column <- ncol(pneumonia) # The last column of the dataset
-#' ms$values <- pneumonia[, start_column:end_column] %>% dplyr::slice(1:10)
+#' ms$values <- pneumonia[1:10, start_column:end_column]
 #' # Assign metadata to ms$rowinfo
-#' ms$rowinfo <- pneumonia %>% dplyr::select(id, group, age, gender, weight, height, BMI) %>% dplyr::slice(1:10) %>% dplyr::mutate(rowid = dplyr::row_number())
+#' ms$rowinfo <- pneumonia[1:10,] %>% dplyr::select(rowid = id, group, age, gender)
 #' ms <- impute_zero(ms)
 #' ms <- rm_feature_batch_inflated_zeros(ms)
 #' head(ms$values)
@@ -317,10 +317,10 @@ rm_feature_batch_inflated_zeros <- function(ms, batch = NULL){
 #' # Assign feature values to ms$values
 #' start_column <- 8 # The first column with feature values
 #' end_column <- ncol(pneumonia) # The last column of the dataset
-#' ms$values <- pneumonia[, start_column:end_column] %>% dplyr::slice(1:10)
+#' ms$values <- pneumonia[1:10, start_column:end_column]
 #'
 #' # Assign metadata to ms$rowinfo
-#' ms$rowinfo <- pneumonia %>% dplyr::select(id, group, age, gender, weight, height, BMI) %>% dplyr::slice(1:10) %>% dplyr::mutate(rowid = dplyr::row_number())
+#' ms$rowinfo <- pneumonia[1:10,] %>% dplyr::select(rowid = id, group, age, gender)
 #' ms <- impute_zero(ms)
 #' ms <- rm_sample_min_batch_occurence(ms)
 #' head(ms$values)
@@ -375,10 +375,10 @@ rm_sample_min_batch_occurence <- function(ms, min_occurence = 5, batch = NULL){
 #' # Assign feature values to ms$values
 #' start_column <- 8 # The first column with feature values
 #' end_column <- ncol(pneumonia) # The last column of the dataset
-#' ms$values <- pneumonia[, start_column:end_column] %>% dplyr::slice(1:10)
+#' ms$values <- pneumonia[1:10, start_column:end_column]
 #'
 #' # Assign metadata to ms$rowinfo
-#' ms$rowinfo <- pneumonia %>% dplyr::select(id, group, age, gender, weight, height, BMI) %>% dplyr::slice(1:10) %>% dplyr::mutate(rowid = dplyr::row_number())
+#' ms$rowinfo <- pneumonia[1:10,] %>% dplyr::select(rowid = id, group, age, gender)
 #' ms <- impute_zero(ms)
 #' ms <- rm_sample_pca_outliers(ms)
 rm_sample_pca_outliers <- function(ms, plot = FALSE) {
@@ -476,10 +476,10 @@ rm_sample_pca_outliers <- function(ms, plot = FALSE) {
 #' # Assign feature values to ms$values
 #' start_column <- 8 # The first column with feature values
 #' end_column <- ncol(pneumonia) # The last column of the dataset
-#' ms$values <- pneumonia[, start_column:end_column] %>% dplyr::slice(1:10)
+#' ms$values <- pneumonia[1:10, start_column:end_column]
 #' # Assign metadata to ms$rowinfo
 #' ms$rowinfo <- pneumonia %>%
-#'     dplyr::select(id, group, age, gender, weight, height, BMI) %>%
+#'     dplyr::select(id, group, age, gender) %>%
 #'     dplyr::slice(1:10) %>%
 #'     dplyr::mutate(rowid = dplyr::row_number())
 #' ms <- impute_zero(ms)
@@ -553,9 +553,9 @@ rm_IS_outliers <- function(ms, standards, tolerance = 0, quantiles = c(0.025, 0.
 #' # Assign feature values to ms$values
 #' start_column <- 8 # The first column with feature values
 #' end_column <- ncol(pneumonia) # The last column of the dataset
-#' ms$values <- pneumonia[, start_column:end_column] %>% dplyr::slice(1:10)
+#' ms$values <- pneumonia[1:10, start_column:end_column]
 #' # Assign metadata to ms$rowinfo
-#' ms$rowinfo <- pneumonia %>% dplyr::select(id, group, age, gender, weight, height, BMI) %>% dplyr::slice(1:10) %>% dplyr::mutate(rowid = dplyr::row_number())
+#' ms$rowinfo <- pneumonia[1:10,] %>% dplyr::select(rowid = id, group, age, gender)
 #' ms <- impute_zero(ms)
 #' ms <- rm_feature_extreme_values(ms)
 rm_feature_extreme_values <- function(ms) {
@@ -611,9 +611,9 @@ rm_feature_extreme_values <- function(ms) {
 #' # Assign feature values to ms$values
 #' start_column <- 8 # The first column with feature values
 #' end_column <- ncol(pneumonia) # The last column of the dataset
-#' ms$values <- pneumonia[, start_column:end_column] %>% dplyr::slice(1:100)
+#' ms$values <- pneumonia[1:100, start_column:end_column]
 #' # Assign metadata to ms$rowinfo
-#' ms$rowinfo <- pneumonia %>% dplyr::select(id, group, age, gender, weight, height, BMI) %>% dplyr::slice(1:100) %>% dplyr::mutate(rowid = dplyr::row_number())
+#' ms$rowinfo <- pneumonia[1:100,] %>% dplyr::select(rowid = id, group, age, gender)
 #' ms <- impute_zero(ms)
 #' ms <- normalize_robust_row(ms)
 normalize_robust_row <- function(ms) {
@@ -671,10 +671,10 @@ normalize_robust_row <- function(ms) {
 #' # Assign feature values to ms$values
 #' start_column <- 8 # The first column with feature values
 #' end_column <- ncol(pneumonia) # The last column of the dataset
-#' ms$values <- pneumonia[, start_column:end_column] %>% dplyr::slice(1:10)
+#' ms$values <- pneumonia[1:10, start_column:end_column]
 #'
 #' # Assign metadata to ms$rowinfo
-#' ms$rowinfo <- pneumonia %>% dplyr::select(id, group, age, gender, weight, height, BMI) %>% dplyr::slice(1:10) %>% dplyr::mutate(rowid = dplyr::row_number())
+#' ms$rowinfo <- pneumonia[1:10,] %>% dplyr::select(rowid = id, group, age, gender)
 #' ms <- impute_zero(ms)
 #' ms <- normalize_pqn(ms)
 #' head(ms$values)
@@ -735,10 +735,10 @@ normalize_pqn <- function(ms, n = "median", QC = NULL) {
 #' # Assign feature values to ms$values
 #' start_column <- 8 # The first column with feature values
 #' end_column <- ncol(pneumonia) # The last column of the dataset
-#' ms$values <- pneumonia[, start_column:end_column] %>% dplyr::slice(1:10)
+#' ms$values <- pneumonia[1:10, start_column:end_column]
 #'
 #' # Assign metadata to ms$rowinfo
-#' ms$rowinfo <- pneumonia %>% dplyr::select(id, group, age, gender, weight, height, BMI) %>% dplyr::slice(1:10) %>% dplyr::mutate(rowid = dplyr::row_number())
+#' ms$rowinfo <- pneumonia[1:10,] %>% dplyr::select(rowid = id, group, age, gender)
 #' ms <- impute_zero(ms)
 #' ms <- normalize_waveICA2(ms)
 #' head(ms$values)
@@ -786,10 +786,10 @@ normalize_combat <- function(ms){
 #' # Assign feature values to ms$values
 #' start_column <- 8 # The first column with feature values
 #' end_column <- ncol(pneumonia) # The last column of the dataset
-#' ms$values <- pneumonia[, start_column:end_column] %>% dplyr::slice(1:10)
+#' ms$values <- pneumonia[1:10, start_column:end_column]
 #'
 #' # Assign metadata to ms$rowinfo
-#' ms$rowinfo <- pneumonia %>% dplyr::select(id, group, age, gender, weight, height, BMI) %>% dplyr::slice(1:10) %>% dplyr::mutate(rowid = dplyr::row_number())
+#' ms$rowinfo <- pneumonia[1:10,] %>% dplyr::select(rowid = id, group, age, gender)
 #' ms <- impute_zero(ms)
 #' ms <- normalize_limma_quantile(ms)
 #' head(ms$values)
@@ -818,10 +818,10 @@ normalize_limma_quantile <- function(ms){
 #' # Assign feature values to ms$values
 #' start_column <- 8 # The first column with feature values
 #' end_column <- ncol(pneumonia) # The last column of the dataset
-#' ms$values <- pneumonia[, start_column:end_column] %>% dplyr::slice(1:10)
+#' ms$values <- pneumonia[1:10, start_column:end_column]
 #'
 #' # Assign metadata to ms$rowinfo
-#' ms$rowinfo <- pneumonia %>% dplyr::select(id, group, age, gender, weight, height, BMI) %>% dplyr::slice(1:10) %>% dplyr::mutate(rowid = dplyr::row_number())
+#' ms$rowinfo <- pneumonia[1:10,] %>% dplyr::select(rowid = id, group, age, gender)
 #' ms <- impute_zero(ms)
 #' ms <- normalize_limma_cyclicloess(ms)
 #' head(ms$values)
@@ -854,10 +854,10 @@ normalize_limma_cyclicloess <- function(ms){
 #' # Assign feature values to ms$values
 #' start_column <- 8 # The first column with feature values
 #' end_column <- ncol(pneumonia) # The last column of the dataset
-#' ms$values <- pneumonia[, start_column:end_column] %>% dplyr::slice(1:10)
+#' ms$values <- pneumonia[1:10, start_column:end_column]
 #'
 #' # Assign metadata to ms$rowinfo
-#' ms$rowinfo <- pneumonia %>% dplyr::select(id, group, age, gender, weight, height, BMI) %>% dplyr::slice(1:10) %>% dplyr::mutate(rowid = dplyr::row_number())
+#' ms$rowinfo <- pneumonia[1:10,] %>% dplyr::select(rowid = id, group, age, gender)
 #' ms <- impute_zero(ms)
 #' ms <-select_most_variable_features(ms, n=10)
 #' head(ms$values)
@@ -908,10 +908,10 @@ select_most_variable_features <- function(ms, n=500) {
 #' # Assign feature values to ms$values
 #' start_column <- 8 # The first column with feature values
 #' end_column <- ncol(pneumonia) # The last column of the dataset
-#' ms$values <- pneumonia[, start_column:end_column] %>% dplyr::slice(1:10)
+#' ms$values <- pneumonia[1:10, start_column:end_column]
 #'
 #' # Assign metadata to ms$rowinfo
-#' ms$rowinfo <- pneumonia %>% dplyr::select(id, group, age, gender, weight, height, BMI) %>% dplyr::slice(1:10) %>% dplyr::mutate(rowid = dplyr::row_number())
+#' ms$rowinfo <- pneumonia[1:10,] %>% dplyr::select(rowid = id, group, age, gender)
 #' ms <- impute_zero(ms)
 #' ms <- standardize_z_batch(ms)
 #' head(ms$values)
@@ -980,12 +980,12 @@ standardize_z_batch <- function(ms, batch_column = NULL) {
 #' # Assign feature values to ms$values
 #' start_column <- 8 # The first column with feature values
 #' end_column <- ncol(pneumonia) # The last column of the dataset
-#' ms$values <- pneumonia[, start_column:end_column] %>% dplyr::slice(1:10)
+#' ms$values <- pneumonia[1:100, start_column:end_column]
 #'
 #' # Assign metadata to ms$rowinfo
-#' ms$rowinfo <- pneumonia %>% dplyr::select(id, group, age, gender, weight, height, BMI) %>% dplyr::slice(1:10) %>% dplyr::mutate(rowid = dplyr::row_number())
+#' ms$rowinfo <- pneumonia[1:100,] %>% dplyr::select(rowid = id, group, age, gender)
 #' ms <- impute_zero(ms)
-#' plot_pca(ms, color_labels = "rowid")
+#' plot_pca(ms, color_label = "rowid")
 #'
 plot_pca <- function(ms, color_label="rowid") {
   tmp1 <- ms$rowinfo
@@ -1065,10 +1065,10 @@ plot_pca <- function(ms, color_label="rowid") {
 #' # Assign feature values to ms$values
 #' start_column <- 8 # The first column with feature values
 #' end_column <- ncol(pneumonia) # The last column of the dataset
-#' ms$values <- pneumonia[, start_column:end_column] %>% dplyr::slice(1:10)
+#' ms$values <- pneumonia[1:10, start_column:end_column]
 #'
 #' # Assign metadata to ms$rowinfo
-#' ms$rowinfo <- pneumonia %>% dplyr::select(id, group, age, gender, weight, height, BMI) %>% dplyr::slice(1:10) %>% dplyr::mutate(rowid = dplyr::row_number())
+#' ms$rowinfo <- pneumonia[1:10,] %>% dplyr::select(rowid = id, group, age, gender)
 #' ms <- impute_zero(ms)
 #' plot_standards(ms, standards = c("M363T419","M512T603","M364T419","M365T392", "M143T177"))
 plot_standards <- function(ms, standards, batch = NULL) {
@@ -1121,10 +1121,10 @@ plot_standards <- function(ms, standards, batch = NULL) {
 #' # Assign feature values to ms$values
 #' start_column <- 8 # The first column with feature values
 #' end_column <- ncol(pneumonia) # The last column of the dataset
-#' ms$values <- pneumonia[, start_column:end_column] %>% dplyr::slice(1:100)
+#' ms$values <- pneumonia[1:100, start_column:end_column]
 #'
 #' # Assign metadata to ms$rowinfo
-#' ms$rowinfo <- pneumonia %>% dplyr::select(id, group, age, gender, weight, height, BMI) %>% dplyr::slice(1:100) %>% dplyr::mutate(rowid = dplyr::row_number())
+#' ms$rowinfo <- pneumonia[1:100,] %>% dplyr::select(rowid = id, group, age, gender)
 #' ms <- impute_zero(ms)
 #' tmp1 <- ms$rowinfo
 #' tmp2 <- ms$values
