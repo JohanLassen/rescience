@@ -463,11 +463,12 @@ rm_sample_pca_outliers <- function(ms, plot = FALSE) {
 #' The smaller the more restrictive. The tolerance reflects the number of outlier ISs allowed per sample.
 #' Outlier is given by lying in the 5 percent most extreme values. This means that if a threshold of 1 is used 5 percent of samples are removed.
 #' This should be used carefully.}
+#' @param batch column name of batch info
 #'
 #' @return ms
 #' @export
 #'
-#' @example
+#' @examples
 #' # First convert the pneumonia object to a tibble.
 #' pneumonia <- tibble::tibble(pneumonia)
 #' # Generate list object
@@ -484,10 +485,16 @@ rm_sample_pca_outliers <- function(ms, plot = FALSE) {
 #' ms <- impute_zero(ms)
 #' ms <- rm_IS_outliers(ms, standards = c("M363T419","M512T603","M364T419","M365T392", "M143T177"), tolerance = 4, quantiles = c(0.01, 0.99))
 #'
-rm_IS_outliers <- function(ms, standards, tolerance = 0, quantiles = c(0.025, 0.975)){
+rm_IS_outliers <- function(ms, standards, tolerance = 0, quantiles = c(0.025, 0.975), batch = NULL){
   tmp1 <- ms$rowinfo
   tmp2 <- ms$values
 
+  if (is.null(batch)){
+    batch = rep(1, length(tmp1$rowid))
+  } else{
+    batch = tmp1[[batch]]
+  }
+  tmp1 <- tmp1 %>% dplyr::mutate(BATCH = batch)
   good_data <-
     tmp2 %>%
     dplyr::select(all_of(standards)) %>%
@@ -954,7 +961,7 @@ standardize_z_batch <- function(ms, batch_column = NULL) {
 #' PCA plot (beta)
 #'
 #' @param ms List object containing value and metadata
-#' @param color_labels coloring code for plot
+#' @param color_label coloring code for plot
 #'
 #' @return ggplot2 plot
 #' @export
@@ -980,55 +987,58 @@ standardize_z_batch <- function(ms, batch_column = NULL) {
 #' ms <- impute_zero(ms)
 #' plot_pca(ms, color_labels = "rowid")
 #'
-plot_pca <- function(ms, color_labels=c("rowid")) {
+plot_pca <- function(ms, color_label="rowid") {
   tmp1 <- ms$rowinfo
   tmp2 <- ms$values
   r  <- prcomp(x = tmp2, retx = TRUE, center = T, scale = T, rank. = 12)
 
+  variance_explained <- summary(r)$importance[2,1:12]
+  variance_explained <- round(variance_explained, 3)*100
+
   pd <- r$x %>%
     tibble::as_tibble() %>%
-    dplyr::bind_cols(tmp1 %>% dplyr::select(dplyr::all_of(color_labels))) %>%
+    dplyr::bind_cols(tmp1 %>% dplyr::select(dplyr::all_of(color_label))) %>%
     {.}
 
   plotlist <- list()
   titles <- list()
 
   for(i in 1:(ncol(r$x)/2)) {
-    mini_plotlist <- list()
-    #titles <- list()
-    for (fill in color_labels) {
-      #i <- 1
-      xvar <- names(pd)[2*i-1]
-      yvar <- names(pd)[2*i]
+
+    xvar <- names(pd)[2*i-1]
+    yvar <- names(pd)[2*i]
+    p1 <-
+      ggplot2::ggplot(pd, ggplot2::aes_string(x=xvar, y=yvar, fill=color_label))+
+      ggplot2::geom_point(shape=21, color="#FFFFFFFF", size=2, show.legend = F) +
+      ggplot2::labs(fill = fill, x = paste0(xvar, " (", variance_explained[xvar], " %)"), y = paste0(yvar, " (", variance_explained[yvar], " %)"))+
+      ggplot2::theme_minimal() +
+      ggplot2::theme(axis.title.x = element_text(size = 8),
+                     axis.title.y = element_text(size = 8),
+                     axis.text.x = element_text(size = 8),
+                     axis.text.y = element_text(size = 8))
+    NULL
+    plotlist[[length(plotlist)+1]] <- p1
+
+    if (i == 1){
       p1 <-
-        ggplot2::ggplot(pd, ggplot2::aes_string(x=xvar, y=yvar, fill=fill))+
-        ggplot2::geom_point(shape=21, color="#FFFFFFFF", size=2, show.legend = F) +
-        ggplot2::labs(fill = fill)+
-        ggplot2::theme_minimal() +
-        NULL
-      if (i == 1) {
-        title <- cowplot::ggdraw() + cowplot::draw_label(fill)
-        titles[[length(titles)+1]] <- title
-      }
+        ggplot2::ggplot(pd, ggplot2::aes_string(x=xvar, y=yvar, fill=color_label))+
+        ggplot2::geom_point(shape=21, color="#FFFFFFFF", size=2)+
+        ggplot2::theme(legend.text = element_text(size=8), legend.title = element_text(size=12)) +
+        ggplot2::guides(fill = ggplot2::guide_legend(override.aes = list(size = 2)))
 
-      mini_plotlist[[length(mini_plotlist)+1]] <- p1
-      rm(p1)
+      legend <- cowplot::get_legend(p1 + ggplot2::theme(legend.box.margin = ggplot2::margin(0, 0, 0, 12)))
     }
-
-    aggrgte <- cowplot::plot_grid(plotlist = mini_plotlist, ncol = 1)
-    plotlist[[length(plotlist)+1]] <- aggrgte
   }
 
   p1 <- cowplot::plot_grid(plotlist = plotlist, nrow=1)
-  title <- cowplot::ggdraw() + cowplot::draw_label(paste(ncol(tmp2), "features"))
-  p2 <- cowplot::plot_grid(title, p1, ncol = 1, rel_heights=c(0.1, 1))
-
-  titles <- cowplot::plot_grid(plotlist = titles, ncol=1)
-  final <- cowplot::plot_grid(titles, p2, nrow=1, rel_widths = c(2, 10))
-
+  p1 <- cowplot::plot_grid(p1, legend, rel_widths = c(3, .4))
+  title <- cowplot::ggdraw() + cowplot::draw_label(paste("PCA of", ncol(tmp2), "Features"), size = 12)
+  final <- cowplot::plot_grid(title, p1, nrow=2, rel_heights = c(1, 10))
 
   return(final)
 }
+
+
 
 #' Plot intensity vs injection order
 #'
@@ -1245,8 +1255,8 @@ plot_importance <- function(model){
 prob_vs_continuous <- function(model, target_info, var_name){
   pdata <-
     model$pred %>%
-    dplyr::arrange(rowIndex) %>%
-    dplyr::mutate(rowid = rowIndex) %>%
+    dplyr::arrange(.data$rowIndex) %>%
+    dplyr::mutate(rowid = .data$rowIndex) %>%
     dplyr::inner_join(target_info %>% dplyr::drop_na() %>% dplyr::mutate(rowid = dplyr::row_number()), by = "rowid")
 
   classes <- unique(model_cv_r$obs)

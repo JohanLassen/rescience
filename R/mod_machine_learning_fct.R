@@ -12,7 +12,7 @@
 model_screening <-
   function(ms, methods, outcome, tech_rep = NULL){
     print(methods)
-    models <- list("Elastic Net" = "glmnet", "Random Forest(RF)"="ranger", "Gradient Boosting(GB)"="XgbTree", "PLS(-DA)" = "pls", "SVM"="svm")
+    models <- list("Elastic Net" = "glmnet", "Random Forest(RF)"="ranger", "Gradient Boosting(GB)"="xgbTree", "PLS(-DA)" = "pls", "SVM"="svm")
     for (i in 1:length(methods)){
       methods[i] <- models[[methods[i]]]
     }
@@ -56,7 +56,6 @@ mcc <-
 #' @export
 fit_models <- function(x, y, methods = c("glmnet", "pls")){
   x <- as.matrix(x)
-  print(x[1:100, 1:100])
   if (!(is.numeric(y) & length(unique(y)) > length(y) %/% 3)) {
     y <- as.factor(y)
   }
@@ -104,6 +103,12 @@ get_performance <-
   }
 
 
+#' Plot performance of screened ML models
+#'
+#' @param fits list of caret models
+#'
+#' @return ROC plot and repeat-wise performance plot
+#' @export
 plot_performance <-
   function(fits){
 

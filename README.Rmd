@@ -34,7 +34,7 @@ You can install the development version of rescience from [GitHub](https://githu
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("JohanLassen/rescience")
+# devtools::install_github("JohanLassen/rescience")
 ```
 
 ## Example
@@ -89,46 +89,78 @@ end_column <- ncol(pneumonia) # The last column of the dataset
 ms$values <- pneumonia[, start_column:end_column]
 
 # Assign metadata to ms$rowinfo
-ms$rowinfo <- pneumonia %>% select(id, group, age, gender, weight, height, BMI)
+ms$rowinfo <- pneumonia %>% select(rowid = id, group, age, gender, weight, height, BMI)
 ```
 
 
 Now the ms object is made
 
-```{r}
+```{r, echo = F}
 
-head(ms$values[,1:10])
+# showing first 5 columns
+knitr::kable(head(ms$values[,1:5]), caption = 'Feature values', align = "c")
 
 ```
 
-```{r}
+```{r, echo = F}
 
-head(ms$rowinfo)
+knitr::kable(head(ms$rowinfo), caption = 'Meta Data', align = "r")
 
 ```
 
 
 # Preprocessing
-```{r}
+```{r, fig.height=3, fig.width=6, out.width='600px', out.height="300px", fig.align='center', fig.cap='...'}
 
 # fourth root transformation
-ms <- rescience:::transform_fourth_root(ms)
+ms <- transform_fourth_root(ms)
 
 # Probabilistic quotient normalization
-ms <- rescience:::normalize_pqn(ms)
+ms <- normalize_pqn(ms)
 
 # Visualize distributions of first 10 compounds to see effect of preprocessing
-ms$values[,1:10] %>% 
+ms$values[,1:5] %>% 
   pivot_longer(cols = everything(), names_to = "Feature") %>%
   mutate(Feature = as.factor(Feature)) %>% 
-  ggplot(aes(x=value, color = Feature)) +
-  geom_freqpoly()
+  ggplot(aes(x=value, fill = Feature)) +
+  geom_histogram(position = "identity", alpha = 0.3)
   
 ```
 
 And if we want to see the PCA plot:
 
-```{r}
-rescience:::plot_pca(ms, color_labels = "group")
+```{r, fig.height=3, fig.width=10, out.width='1000px', out.height="300px", fig.align='center', fig.cap='...'}
+
+# We plot by rowid as the data doesn't have batch info, but the rowid reflects the injection order
+plot_pca(ms, color_label = "rowid") 
+
 ```
+
+# Machine learning
+
+## Fitting multiple models
+
+```{r, results='hide', warning=FALSE, message=FALSE}
+
+fits <- fit_models(x = ms$values, y=ms$rowinfo$group, methods = c("pls", "glmnet")) #PLS, Elastic net, Random Forest
+
+```
+
+## Obtaining the performance from the models
+
+```{r}
+
+performance <- get_performance(fits)
+
+knitr::kable(performance)
+
+```
+
+## Plotting performance
+
+```{r, fig.height=3, fig.width=7, out.width='700px', out.height="300px", fig.align='center', fig.cap='...'}
+plot_performance(fits)
+```
+
+
 

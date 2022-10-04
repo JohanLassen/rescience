@@ -4,12 +4,12 @@
 \alias{plot_pca}
 \title{PCA plot (beta)}
 \usage{
-plot_pca(ms, color_labels = c("rowid"))
+plot_pca(ms, color_label = "rowid")
 }
 \arguments{
 \item{ms}{List object containing value and metadata}
 
-\item{color_labels}{coloring code for plot}
+\item{color_label}{coloring code for plot}
 }
 \value{
 ggplot2 plot

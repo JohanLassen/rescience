@@ -20,7 +20,7 @@ You can install the development version of rescience from
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("JohanLassen/rescience")
+# devtools::install_github("JohanLassen/rescience")
 ```
 
 ## Example
@@ -108,102 +108,93 @@ end_column <- ncol(pneumonia) # The last column of the dataset
 ms$values <- pneumonia[, start_column:end_column]
 
 # Assign metadata to ms$rowinfo
-ms$rowinfo <- pneumonia %>% select(id, group, age, gender, weight, height, BMI)
+ms$rowinfo <- pneumonia %>% select(rowid = id, group, age, gender, weight, height, BMI)
 ```
 
 Now the ms object is made
 
-``` r
+| M363T419  | M512T603 | M364T419  | M365T392  | M186T177  |
+|:---------:|:--------:|:---------:|:---------:|:---------:|
+| 39263.557 | 11244.54 | 7082.998  | 54547.315 | 124593.65 |
+| 17007.974 | 22493.90 | 6935.703  | 57963.620 | 76165.73  |
+| 6923.392  | 55520.32 | 2572.867  | 5009.616  | 26871.19  |
+| 23110.664 | 71463.46 | 5341.382  | 5785.511  | 64805.11  |
+| 36682.675 | 35475.75 | 10147.962 | 10432.764 | 29821.71  |
+| 24076.265 | 34263.70 | 5705.732  | 8523.413  | 12463.62  |
 
-head(ms$values[,1:10])
-#> # A tibble: 6 × 10
-#>   M363T419 M512T603 M364T419 M365T392 M186T177 M366T392 M512T529 M185T177_1
-#>      <dbl>    <dbl>    <dbl>    <dbl>    <dbl>    <dbl>    <dbl>      <dbl>
-#> 1   39264.   11245.    7083.   54547.  124594.   13083.    1017.   1068547.
-#> 2   17008.   22494.    6936.   57964.   76166.   12617.    5082.    635896.
-#> 3    6923.   55520.    2573.    5010.   26871.    1454.   42697.    218863.
-#> 4   23111.   71463.    5341.    5786.   64805.    3269.   33617.    620007.
-#> 5   36683.   35476.   10148.   10433.   29822.    3225.   10518.    286114.
-#> 6   24076.   34264.    5706.    8523.   12464.    5665.    7042.    110002.
-#> # … with 2 more variables: M534T603 <dbl>, M143T177 <dbl>
-```
+Feature values
 
-``` r
+| rowid |   group | age | gender | weight | height |   BMI |
+|------:|--------:|----:|-------:|-------:|-------:|------:|
+|     1 | control |  87 |      K |     74 |    176 | 23.89 |
+|     2 | control |  48 |      K |     52 |     NA |    NA |
+|     3 | control |  53 |      M |     80 |    178 | 25.25 |
+|     4 | control |  27 |      M |     67 |    171 | 22.91 |
+|     5 | control |  27 |      M |     81 |    180 | 25.00 |
+|     6 | control |  49 |      M |     NA |    150 |    NA |
 
-head(ms$rowinfo)
-#> # A tibble: 6 × 7
-#>      id group     age gender weight height   BMI
-#>   <dbl> <chr>   <dbl> <chr>   <dbl>  <dbl> <dbl>
-#> 1     1 control    87 K          74    176  23.9
-#> 2     2 control    48 K          52     NA  NA  
-#> 3     3 control    53 M          80    178  25.2
-#> 4     4 control    27 M          67    171  22.9
-#> 5     5 control    27 M          81    180  25  
-#> 6     6 control    49 M          NA    150  NA
-```
+Meta Data
 
 # Preprocessing
 
 ``` r
 
 # fourth root transformation
-ms <- rescience:::transform_fourth_root(ms)
+ms <- transform_fourth_root(ms)
 
 # Probabilistic quotient normalization
-ms <- rescience:::normalize_pqn(ms)
+ms <- normalize_pqn(ms)
 
 # Visualize distributions of first 10 compounds to see effect of preprocessing
-ms$values[,1:10] %>% 
+ms$values[,1:5] %>% 
   pivot_longer(cols = everything(), names_to = "Feature") %>%
   mutate(Feature = as.factor(Feature)) %>% 
-  ggplot(aes(x=value, color = Feature)) +
-  geom_freqpoly()
+  ggplot(aes(x=value, fill = Feature)) +
+  geom_histogram(position = "identity", alpha = 0.3)
 #> `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 ```
 
-<img src="man/figures/README-unnamed-chunk-6-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-6-1.png" alt="..." width="600px" height="300px" style="display: block; margin: auto;" />
 
 And if we want to see the PCA plot:
 
 ``` r
-rescience:::plot_pca(ms, color_labels = "group")
-#> $values
-#> # A tibble: 404 × 1,957
-#>    M363T419 M512T603 M364T419 M365T392 M186T177 M366T392 M512T529 M185T177_1
-#>       <dbl>    <dbl>    <dbl>    <dbl>    <dbl>    <dbl>    <dbl>      <dbl>
-#>  1    15.3      11.2     9.98    16.6      20.4    11.6      6.14       35.0
-#>  2    12.9      13.9    10.3     17.6      18.8    12.0      9.57       32.0
-#>  3     9.66     16.3     7.54     8.91     13.6     6.54    15.2        22.9
-#>  4    13.4      17.8     9.29     9.48     17.3     8.22    14.7        30.5
-#>  5    14.4      14.3    10.5     10.5      13.7     7.85    10.6        24.1
-#>  6    14.6      15.9    10.2     11.2      12.3    10.1     10.7        21.3
-#>  7    14.7      13.0    10.5     12.8      17.4     9.18     4.68       30.8
-#>  8    13.5      14.8     9.52    12.4      17.2     8.67    15.7        29.8
-#>  9    14.7      14.6     9.96     9.96     16.6     9.53    12.3        28.9
-#> 10    16.0      16.4    11.2     14.6      15.7    10.1     15.3        28.1
-#> # … with 394 more rows, and 1,949 more variables: M534T603 <dbl>,
-#> #   M143T177 <dbl>, M125T177 <dbl>, M185T177_2 <dbl>, M207T177 <dbl>,
-#> #   M126T177 <dbl>, M483T612 <dbl>, M482T612 <dbl>, M994T628 <dbl>,
-#> #   M484T613 <dbl>, M86T124 <dbl>, M126T59 <dbl>, M558T617 <dbl>,
-#> #   M127T177 <dbl>, M993T628 <dbl>, M128T125 <dbl>, M992T628 <dbl>,
-#> #   M146T93 <dbl>, M330T231 <dbl>, M521T616 <dbl>, M559T617 <dbl>,
-#> #   M318T215 <dbl>, M146T125 <dbl>, M151T128 <dbl>, M188T137 <dbl>, …
-#> 
-#> $rowinfo
-#> # A tibble: 404 × 7
-#>       id group     age gender weight height   BMI
-#>    <dbl> <chr>   <dbl> <chr>   <dbl>  <dbl> <dbl>
-#>  1     1 control    87 K          74    176  23.9
-#>  2     2 control    48 K          52     NA  NA  
-#>  3     3 control    53 M          80    178  25.2
-#>  4     4 control    27 M          67    171  22.9
-#>  5     5 control    27 M          81    180  25  
-#>  6     6 control    49 M          NA    150  NA  
-#>  7     7 control    27 M          79    183  23.6
-#>  8     8 control    23 M          97    170  33.6
-#>  9     9 control    31 K          66    170  22.8
-#> 10    10 control    18 M          75    174  24.8
-#> # … with 394 more rows
+
+# We plot by rowid as the data doesn't have batch info, but the rowid reflects the injection order
+plot_pca(ms, color_label = "rowid") 
 ```
 
-<img src="man/figures/README-unnamed-chunk-7-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-7-1.png" alt="..." width="1000px" height="300px" style="display: block; margin: auto;" />
+
+# Machine learning
+
+## Fitting multiple models
+
+``` r
+
+fits <- fit_models(x = ms$values, y=ms$rowinfo$group, methods = c("pls", "glmnet")) #PLS, Elastic net, Random Forest
+```
+
+## Obtaining the performance from the models
+
+``` r
+
+performance <- get_performance(fits)
+
+knitr::kable(performance)
+```
+
+| method | rep  |  accuracy |       mcc |
+|:-------|:-----|----------:|----------:|
+| glmnet | Rep1 | 0.7530253 | 0.4953219 |
+| glmnet | Rep2 | 0.7621012 | 0.5144059 |
+| pls    | Rep1 | 0.6782178 | 0.3431979 |
+| pls    | Rep2 | 0.6666667 | 0.3212393 |
+
+## Plotting performance
+
+``` r
+plot_performance(fits)
+```
+
+<img src="man/figures/README-unnamed-chunk-10-1.png" alt="..." width="700px" height="300px" style="display: block; margin: auto;" />

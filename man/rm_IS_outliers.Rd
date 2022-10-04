@@ -4,7 +4,13 @@
 \alias{rm_IS_outliers}
 \title{Remove samples if internal standards are outliers}
 \usage{
-rm_IS_outliers(ms, standards, tolerance = 0, quantiles = c(0.025, 0.975))
+rm_IS_outliers(
+  ms,
+  standards,
+  tolerance = 0,
+  quantiles = c(0.025, 0.975),
+  batch = NULL
+)
 }
 \arguments{
 \item{ms}{{List object containing value data and rowinfo data (meta data)}}
@@ -19,10 +25,30 @@ Outlier is given by lying in the 5 percent most extreme values. This means that 
 This should be used carefully.}}
 
 \item{quantiles}{{How extreme should an IS value be before being assigned as an outlier.}}
+
+\item{batch}{column name of batch info}
 }
 \value{
 ms
 }
 \description{
 Remove samples if internal standards are outliers
+}
+\examples{
+# First convert the pneumonia object to a tibble.
+pneumonia <- tibble::tibble(pneumonia)
+# Generate list object
+ms <- list()
+# Assign feature values to ms$values
+start_column <- 8 # The first column with feature values
+end_column <- ncol(pneumonia) # The last column of the dataset
+ms$values <- pneumonia[, start_column:end_column] \%>\% dplyr::slice(1:10)
+# Assign metadata to ms$rowinfo
+ms$rowinfo <- pneumonia \%>\%
+    dplyr::select(id, group, age, gender, weight, height, BMI) \%>\%
+    dplyr::slice(1:10) \%>\%
+    dplyr::mutate(rowid = dplyr::row_number())
+ms <- impute_zero(ms)
+ms <- rm_IS_outliers(ms, standards = c("M363T419","M512T603","M364T419","M365T392", "M143T177"), tolerance = 4, quantiles = c(0.01, 0.99))
+
 }

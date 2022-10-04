@@ -63,9 +63,9 @@ mod_preprocess_server <- function(id, data){
     output$table2 <- renderTable(head(ms1()$values[,1:10]), width = "400px")
     output$table3 <- renderTable(head(ms2()$values[,1:10]), width = "400px")
     output$table4 <- renderTable(head(ms3()$values[,1:10]), width = "400px")
-    output$plot1 <- renderPlot(plot_pca(ms1(), color_labels = c(data$batch())))
-    output$plot2 <- renderPlot(plot_pca(ms2(), color_labels = c(data$batch())))
-    output$plot3 <- renderPlot(plot_pca(ms3(), color_labels = c(data$batch())))
+    output$plot1 <- renderPlot(plot_pca(ms1(), color_label = c(data$batch())))
+    output$plot2 <- renderPlot(plot_pca(ms2(), color_label = c(data$batch())))
+    output$plot3 <- renderPlot(plot_pca(ms3(), color_label = c(data$batch())))
 
 
     list(ms = reactive(ms3()))
