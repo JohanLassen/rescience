@@ -23,46 +23,60 @@ You can install the development version of rescience from
 # devtools::install_github("JohanLassen/rescience")
 ```
 
-## Example
+## Introduction
 
-This is a basic example which shows you how to solve a common problem:
+The package includes one dataset of untargeted metabolomics on autopsies
+of pneumonia deaths vs. other causes. The goal is to assist forensics
+teams in assessing whether suspicious deaths has happened from natural
+causes. To do this we can choose to use machine learning to make a
+predictor of pneumonia vs. control and extract the important features
+for model inference. Often, univariate modeling works equally well by
+using false discovery rates (fdr) - especially for data with less than
+50 observations. This package only implements the machine learning
+pipeline as we observe a general need of reproducible ML (see below).
 
 ``` r
 
 library(rescience)
 library(tidyverse)
-#> ── Attaching packages ─────────────────────────────────────── tidyverse 1.3.1 ──
-#> ✔ ggplot2 3.3.6     ✔ purrr   0.3.4
-#> ✔ tibble  3.1.7     ✔ dplyr   1.0.9
-#> ✔ tidyr   1.2.0     ✔ stringr 1.4.1
-#> ✔ readr   2.1.2     ✔ forcats 0.5.1
-#> ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
-#> ✖ dplyr::filter() masks stats::filter()
-#> ✖ dplyr::lag()    masks stats::lag()
 
 # dataset
-head(pneumonia[,1:10])
-#> # A tibble: 6 × 10
-#>      id group     age gender weight height   BMI M363T419 M512T603 M364T419
-#>   <dbl> <chr>   <dbl> <chr>   <dbl>  <dbl> <dbl>    <dbl>    <dbl>    <dbl>
-#> 1     1 control    87 K          74    176  23.9   39264.   11245.    7083.
-#> 2     2 control    48 K          52     NA  NA     17008.   22494.    6936.
-#> 3     3 control    53 M          80    178  25.2    6923.   55520.    2573.
-#> 4     4 control    27 M          67    171  22.9   23111.   71463.    5341.
-#> 5     5 control    27 M          81    180  25     36683.   35476.   10148.
-#> 6     6 control    49 M          NA    150  NA     24076.   34264.    5706.
+knitr::kable(head(pneumonia[,1:10]), caption = 'Feature values', align = "c")
 ```
 
-To statistically analyze this data it must undergo (1) selection of
+| id  |  group  | age | gender | weight | height |  BMI  | M363T419  | M512T603 | M364T419  |
+|:---:|:-------:|:---:|:------:|:------:|:------:|:-----:|:---------:|:--------:|:---------:|
+|  1  | control | 87  |   K    |   74   |  176   | 23.89 | 39263.557 | 11244.54 | 7082.998  |
+|  2  | control | 48  |   K    |   52   |   NA   |  NA   | 17007.974 | 22493.90 | 6935.703  |
+|  3  | control | 53  |   M    |   80   |  178   | 25.25 | 6923.392  | 55520.32 | 2572.867  |
+|  4  | control | 27  |   M    |   67   |  171   | 22.91 | 23110.664 | 71463.46 | 5341.382  |
+|  5  | control | 27  |   M    |   81   |  180   | 25.00 | 36682.675 | 35475.75 | 10147.962 |
+|  6  | control | 49  |   M    |   NA   |  150   |  NA   | 24076.265 | 34263.70 | 5705.732  |
+
+Feature values
+
+To analyze this data we use the following pipeline (1) selection of
 important variables including outcome, batch, and technical replicates,
 (2) preprocessing to ensure that all features and compounds are within
 the same range of values and to minimize batch effect, (3) perform a
 machine learning model screening to evaluate which model fits the data
-best.
+best. Point 2 and 3 requires caution to avoid overfitting the data, and
+this package tries to provide the most robust setup.
 
-Point 2 and 3 requires the analyst to be careful, read more here.
+# Motivation - Are my results reproducible?
 
-# The simple way to do it
+We see an increasing trend in using PLS-based models in metabolomics
+(PLS, PLS-DA, OPLS, and OPLS-DA). As these methods are supervised (use
+the outcome variable), it is extremely important to perform proper
+validation - ideally in the form of an independent validation set but as
+a minimum in form of cross-validation. Many studies use validation, but
+we also see a trend of including the infamous “PLS scores plots” in the
+main text as proof of “well separation of classes”. These plots are
+*never* representative of the actual performance when the number of
+observations is greatly outnumbered by the number of predictors
+(features).
+
+# Running everything in your web-browser
 
 The package is accompanied with a web app that ensures that a broad
 range of users can confidently use the methods. The app exists as an
@@ -186,10 +200,10 @@ knitr::kable(performance)
 
 | method | rep  |  accuracy |       mcc |
 |:-------|:-----|----------:|----------:|
-| glmnet | Rep1 | 0.7530253 | 0.4953219 |
-| glmnet | Rep2 | 0.7621012 | 0.5144059 |
-| pls    | Rep1 | 0.6782178 | 0.3431979 |
-| pls    | Rep2 | 0.6666667 | 0.3212393 |
+| glmnet | Rep1 | 0.7571507 | 0.5037001 |
+| glmnet | Rep2 | 0.7643014 | 0.5179183 |
+| pls    | Rep1 | 0.6732673 | 0.3320938 |
+| pls    | Rep2 | 0.6650165 | 0.3167685 |
 
 ## Plotting performance
 
@@ -198,3 +212,89 @@ plot_performance(fits)
 ```
 
 <img src="man/figures/README-unnamed-chunk-10-1.png" alt="..." width="700px" height="300px" style="display: block; margin: auto;" />
+
+# Motivation part 2
+
+## Why we should never present training data as results
+
+To showcase that the scores plots are unreliable we can generate an OPLS
+model on the true data and another OPLS model on permuted (shuffled)
+data. In the permuted data, the features contain no signal of the
+permuted outcome variable (because it is now random). It is important to
+note that we chose OPLS, but PLS produce the same results.
+
+> The only reproducible information reported by the PLS models is the Q2
+> value. This is based on cross validation of hold out data.
+
+``` r
+
+
+plot_comparison <- function(ms, nobs = NULL){
+  
+  if (is.null(nobs)){
+    nobs = nrow(ms$values)
+  } 
+  
+  # make sampler to simulate what happens for a smaller data set
+  subsample <- sample(1:nrow(ms$values), size = nobs)
+  
+  # prepare data
+  feature_values <- ms$values[subsample,]
+  outcome        <- ms$rowinfo$group[subsample]
+  outcome_perm   <- sample(outcome)
+  
+  # Model using original data
+  opls_model_true <- ropls::opls(x = feature_values, y=outcome, orthoI=1, crossvalI=5, plotI = F, fig.pdfC = "none", info.txtC = "none")
+  
+  # Model using permuted data
+  opls_model_perm <- ropls::opls(x = feature_values, y=outcome_perm, orthoI=1, crossvalI=5, plotI = F, fig.pdfC = "none", info.txtC = "none")
+
+  scores_orig <- tibble(t1    = opls_model_true@scoreMN %>% as.vector(),
+                        to1   = opls_model_true@orthoScoreMN %>% as.vector(),
+                        group = outcome 
+                        )
+  
+  scores_perm <- tibble(t1    = opls_model_perm@scoreMN %>% as.vector(),
+                        to1   = opls_model_perm@orthoScoreMN %>% as.vector(),
+                        group = outcome_perm
+                        )
+
+  original <- 
+    ggplot(scores_orig, aes(x=t1, y=to1, fill=outcome))+
+    geom_point(shape=21, color="white")+
+    stat_ellipse(geom="polygon", 
+                      alpha = 0.2,
+                      show.legend = FALSE, 
+                      level = 0.95)+
+    labs(title = "Original data", subtitle = paste("R2Y =", opls_model_true@summaryDF$`R2Y(cum)`, "and", "Q2 =", opls_model_true@summaryDF$`Q2(cum)`))
+  
+  permuted <-
+    ggplot(scores_perm, aes(x=t1, y=to1, fill=outcome_perm))+
+    geom_point(shape=21, color="white")+
+    stat_ellipse(geom="polygon", 
+                      alpha = 0.2,
+                      show.legend = FALSE, 
+                      level = 0.95)+
+    labs(title = "Permuted data", subtitle = paste("R2Y =", opls_model_perm@summaryDF$`R2Y(cum)`, "and", "Q2 =", opls_model_perm@summaryDF$`Q2(cum)`))
+  
+  legend <- cowplot::get_legend(original + theme(legend.box.margin = margin(0, 0, 0, 12)))
+  
+  plots     <- cowplot::plot_grid(original+theme(legend.position = "none"), permuted+theme(legend.position = "none"), legend, ncol=3, rel_widths = c(3, 3, .6))
+  summaries <- list("permuted" = opls_model_perm@summaryDF, "original" = opls_model_true@summaryDF) %>% bind_rows(.id="data")
+  
+  
+  return(list(plots, summaries))
+}
+
+
+plot_comparison(ms, nobs=100)
+#> [[1]]
+```
+
+<img src="man/figures/README-unnamed-chunk-11-1.png" width="100%" />
+
+    #> 
+    #> [[2]]
+    #>               data R2X(cum) R2Y(cum) Q2(cum) RMSEE pre ort pR2Y  pQ2
+    #> Total...1 permuted    0.119    0.555  -0.403 0.333   1   1 0.75 0.70
+    #> Total...2 original    0.137    0.621   0.213 0.307   1   1 0.35 0.05
