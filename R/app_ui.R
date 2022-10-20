@@ -6,17 +6,19 @@
 #' @noRd
 app_ui <- function(request) {
   tagList(
+    #theme = bslib::bs_theme(bootswatch = "cosmo"),
     # Leave this function for adding external resources
     golem_add_external_resources(),
     # Your application UI logic
-
+    tags$head(
+      tags$link(rel = "stylesheet", type = "text/css", href = "styles.css")
+    ),
     navbarPage(
       "Reproducible Data Science",
-      theme = bslib::bs_theme(bootswatch = "cosmo"),
       tabPanel("Data", mod_dataloader_ui("dataloader_1")),
       tabPanel("Preprocess", mod_preprocess_ui("preprocess_1")),
       tabPanel("Machine Learning", mod_machine_learning_ui("machine_learning_1")),
-      tabPanel("Interpretation", "To be implemented!"),
+      tabPanel("Interpretation", p("To be implemented!")),
       tabPanel("PLS?", "Get outta here!")
       )
     )
@@ -40,7 +42,7 @@ golem_add_external_resources <- function() {
     favicon(),
     bundle_resources(
       path = app_sys("app/www"),
-      app_title = "wwda"
+      app_title = "Reproducible Data Science"
     )
     # Add here other external resources
     # for example, you can add shinyalert::useShinyalert()

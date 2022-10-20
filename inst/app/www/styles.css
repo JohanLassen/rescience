@@ -1,0 +1,21 @@
+
+.p {
+  color: "#2e2e2e";
+}
+
+.action-button {
+  color: white;
+  background-color: #3c5454;
+  border: none;
+  padding: 10px 40px;
+  width: 240px;
+  opacity: 0.8;
+  transition: 0.3s;
+  font-size: 16px;
+}
+
+.action-button:hover {
+  opacity: 1;
+  background-color: #3c5454;
+  color: white;
+}

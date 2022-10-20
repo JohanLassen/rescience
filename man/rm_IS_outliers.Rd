@@ -49,6 +49,6 @@ ms$rowinfo <- pneumonia \%>\%
     dplyr::slice(1:10) \%>\%
     dplyr::mutate(rowid = dplyr::row_number())
 ms <- impute_zero(ms)
-ms <- rm_IS_outliers(ms, standards = c("M363T419","M512T603","M364T419","M365T392", "M143T177"), tolerance = 4, quantiles = c(0.01, 0.99))
+ms <- rm_IS_outliers(ms, standards=c("M363T419","M512T603","M364T419"), tolerance=4, quantiles=c(0.01, 0.99))
 
 }

@@ -19,20 +19,17 @@ mod_preprocess_ui <- function(id){
         selectInput(NS(id, "transform1"), "Select transformation to make data normally distributed", c("log10", "fourth root"), selected = NULL),
         actionButton(NS(id, "transform2"), "Transform data"),
         selectInput(NS(id, "impute1"), "Impute? (default imputation: 0)", c("default", "knn")),
-        actionButton(NS(id, "impute2"), "Impute data"),
+        actionButton(NS(id, "impute2"), "Impute data", class = "btn"),
         selectInput(NS(id, "normalize1"), "Select the normalization you believe is best",
                      c("PQN", "Rownorm", "Quantile normalization", "WaveICA2", "Combat")), # todo: "Batch-wise z-scaling", "Ratios (<100 features)"
         actionButton(NS(id, "normalize2"), "Normalize data"),
-        selectInput(NS(id, "outlier"), "Remove outliers? (by PCA measure)", c("Yes!", "No!"))
-        # radioButtons(NS(id, "order"), "I want to remove outliers before I normalize", c("Yes", "No"), selected = "No"),
-        # h5("
-        # We show the results of the preprocessing as PCA plots colored by batch.
-        # You can try to run additional combinations to optimize
-        # the unsupervized learning but the moment you choose to
-        # see how it works on the machine learning you should freeze
-        # your preprocessing setup. Else you will overfit and your
-        # results wont be as reproducible! Read more on :::
-        #    "),
+        selectInput(NS(id, "outlier"), "Remove outliers? (by PCA measure)", c("Yes!", "No!")),
+        radioButtons(NS(id, "order"), "I want to remove outliers before I normalize", c("Yes", "No"), selected = "No"),
+        p("
+        Try avoiding using the outcome label to color the PCA plots as it increases the risk of overfitting.
+        Instead see how the preprocessing adjusts for batch effect, injection order, and confounders. Read more
+           ", a("here",target="_blank", href="https://johanlassen.github.io/rescience/"))
+
 
       ),
       mainPanel(

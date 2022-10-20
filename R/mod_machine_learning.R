@@ -16,9 +16,12 @@ mod_machine_learning_ui <- function(id){
         selectInput(NS(id, "model1"), "Select multiple models for model screening",
                     c("Elastic Net", "Random Forest(RF)", "Gradient Boosting(GB)", "PLS(-DA)", "SVM"),  #  "OPLS(-DA)",
                     selected = "Elastic Net", multiple=T),
-        actionButton(NS(id, "model2"), "Start training! (RF and GB might take +10 min to train)"),
-        h5(""),
-        actionButton(NS(id, "preprocess"), "Show the screening result (must only be done once per dataset)")
+        actionButton(NS(id, "model2"), "Start training!"),
+        p("Note that random forest and gradient boosting may take +10 minutes.
+          Start out using elastic net and PLS to see if it works."),
+        br(),br(),
+        actionButton(NS(id, "preprocess"), "Final performance"),
+        p("In theory you should only press this once to avoid overfitting")
 
       ),
       mainPanel(
