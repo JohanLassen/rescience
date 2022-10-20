@@ -990,9 +990,9 @@ standardize_z_batch <- function(ms, batch_column = NULL) {
 plot_pca <- function(ms, color_label="rowid") {
   tmp1 <- ms$rowinfo
   tmp2 <- ms$values
-  r  <- prcomp(x = tmp2, retx = TRUE, center = T, scale = T, rank. = 12)
+  r  <- prcomp(x = tmp2, retx = TRUE, center = T, scale = T, rank. = 6)
 
-  variance_explained <- summary(r)$importance[2,1:12]
+  variance_explained <- summary(r)$importance[2,1:6]
   variance_explained <- round(variance_explained, 3)*100
 
   pd <- r$x %>%
@@ -1012,10 +1012,10 @@ plot_pca <- function(ms, color_label="rowid") {
       ggplot2::geom_point(shape=21, color="#FFFFFFFF", size=2, show.legend = F) +
       ggplot2::labs(fill = fill, x = paste0(xvar, " (", variance_explained[xvar], " %)"), y = paste0(yvar, " (", variance_explained[yvar], " %)"))+
       ggplot2::theme_minimal() +
-      ggplot2::theme(axis.title.x = element_text(size = 8),
-                     axis.title.y = element_text(size = 8),
-                     axis.text.x = element_text(size = 8),
-                     axis.text.y = element_text(size = 8))
+      ggplot2::theme(axis.title.x = element_text(size = 12),
+                     axis.title.y = element_text(size = 12),
+                     axis.text.x = element_text(size = 12),
+                     axis.text.y = element_text(size = 12))
     NULL
     plotlist[[length(plotlist)+1]] <- p1
 
@@ -1023,7 +1023,7 @@ plot_pca <- function(ms, color_label="rowid") {
       p1 <-
         ggplot2::ggplot(pd, ggplot2::aes_string(x=xvar, y=yvar, fill=color_label))+
         ggplot2::geom_point(shape=21, color="#FFFFFFFF", size=2)+
-        ggplot2::theme(legend.text = element_text(size=8), legend.title = element_text(size=12)) +
+        ggplot2::theme(legend.text = element_text(size=12), legend.title = element_text(size=12)) +
         ggplot2::guides(fill = ggplot2::guide_legend(override.aes = list(size = 2)))
 
       legend <- cowplot::get_legend(p1 + ggplot2::theme(legend.box.margin = ggplot2::margin(0, 0, 0, 12)))
@@ -1032,7 +1032,7 @@ plot_pca <- function(ms, color_label="rowid") {
 
   p1 <- cowplot::plot_grid(plotlist = plotlist, nrow=1)
   p1 <- cowplot::plot_grid(p1, legend, rel_widths = c(3, .4))
-  title <- cowplot::ggdraw() + cowplot::draw_label(paste("PCA of", ncol(tmp2), "Features"), size = 12)
+  title <- cowplot::ggdraw() + cowplot::draw_label(paste(ncol(tmp2), "Features"), size = 12)
   final <- cowplot::plot_grid(title, p1, nrow=2, rel_heights = c(1, 10))
 
   return(final)

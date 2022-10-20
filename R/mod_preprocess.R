@@ -14,16 +14,26 @@ mod_preprocess_ui <- function(id){
     # setBackgroundImage(
     #   src = "https://www.fillmurray.com/1920/1080"
     # ),
-    sidebarLayout(
-      sidebarPanel(
-        selectInput(NS(id, "transform1"), "Select transformation to make data normally distributed", c("log10", "fourth root"), selected = NULL),
-        actionButton(NS(id, "transform2"), "Transform data"),
-        selectInput(NS(id, "impute1"), "Impute? (default imputation: 0)", c("default", "knn")),
-        actionButton(NS(id, "impute2"), "Impute data", class = "btn"),
-        selectInput(NS(id, "normalize1"), "Select the normalization you believe is best",
-                     c("PQN", "Rownorm", "Quantile normalization", "WaveICA2", "Combat")), # todo: "Batch-wise z-scaling", "Ratios (<100 features)"
-        actionButton(NS(id, "normalize2"), "Normalize data"),
-        selectInput(NS(id, "outlier"), "Remove outliers? (by PCA measure)", c("Yes!", "No!")),
+    fluidRow(
+      column(
+        width = 3,
+        offset = 0,
+        selectInput(NS(id, "transform1"),
+                    p("Select transformation"),
+                    c("log10", "fourth root"), selected = NULL, width = "100%"),
+        actionButton(NS(id, "transform2"),"Transform"),
+        br(), br(),
+        selectInput(NS(id, "impute1"),
+                    "Select imputation",
+                    c("default", "knn"), , width = "100%"),
+        actionButton(NS(id, "impute2"), "Impute", class = "btn"),
+        br(), br(),
+        selectInput(NS(id, "normalize1"),
+                    "Select normalization",
+                     c("PQN", "Rownorm", "Quantile normalization", "WaveICA2", "Combat"), , width = "100%"), # todo: "Batch-wise z-scaling", "Ratios (<100 features)"
+        actionButton(NS(id, "normalize2"), "Normalize"),
+        br(), br(),
+        selectInput(NS(id, "outlier"), "Remove outliers? (by PCA measure)", c("Yes!", "No!"), width = "100%"),
         radioButtons(NS(id, "order"), "I want to remove outliers before I normalize", c("Yes", "No"), selected = "No"),
         p("
         Try avoiding using the outcome label to color the PCA plots as it increases the risk of overfitting.
@@ -32,14 +42,26 @@ mod_preprocess_ui <- function(id){
 
 
       ),
-      mainPanel(
-        tableOutput(NS(id, "table1")),
-        tableOutput(NS(id, "table2")),
-        tableOutput(NS(id, "table3")),
-        tableOutput(NS(id, "table4")),
-        plotOutput(NS(id, "plot1"), width = "1000px"),
-        plotOutput(NS(id, "plot2"), width = "1000px"),
-        plotOutput(NS(id, "plot3"), width = "1000px")
+      column(
+        width = 8,
+        offset = 0,
+        tabsetPanel(
+          tabPanel("data",
+                   h3("Raw"),
+                   tableOutput(NS(id, "table1")),
+                   uiOutput(NS(id, "transformed_tbl2")),
+                   uiOutput(NS(id, "transformed_tbl3")),
+                   uiOutput(NS(id, "transformed_tbl4"))
+                   ),
+          tabPanel("PCA plots",
+                   h3("Raw"),
+                   plotOutput(NS(id, "plot0")),
+                   uiOutput(NS(id, "transformed_pca2")),
+                   uiOutput(NS(id, "transformed_pca3")),
+                   uiOutput(NS(id, "transformed_pca4"))
+                   ),
+          tabPanel("Feature Distributions")
+        )
       )
     )
   )
@@ -56,10 +78,32 @@ mod_preprocess_server <- function(id, data){
     ms2 <- eventReactive(input$impute2,    {impute(ms1(), input$impute1)})
     ms3 <- eventReactive(input$normalize2, {normalize(ms2(), input$normalize1)})
 
-    output$table1 <- renderTable(head(data$ms()$values[,1:10]), width = "400px")
-    output$table2 <- renderTable(head(ms1()$values[,1:10]), width = "400px")
-    output$table3 <- renderTable(head(ms2()$values[,1:10]), width = "400px")
-    output$table4 <- renderTable(head(ms3()$values[,1:10]), width = "400px")
+    ### Making tables ###
+    transformed_data_table2 <- eventReactive(input$transform2,{ tagList(h3("Transformed data"),tableOutput(NS(id, "table2"))) })
+    output$transformed_tbl2 <- renderUI({ transformed_data_table2() })
+
+    transformed_data_table3 <- eventReactive(input$impute2,{ tagList(h3("Imputed data"),tableOutput(NS(id, "table3"))) })
+    output$transformed_tbl3 <- renderUI({ transformed_data_table3() })
+
+    transformed_data_table4 <- eventReactive(input$normalize2,{ tagList(h3("Normalized data"),tableOutput(NS(id, "table4"))) })
+    output$transformed_tbl4 <- renderUI({ transformed_data_table4() })
+
+    ### Making PCA plots ###
+    transformed_data_pca2 <- eventReactive(input$transform2,{ tagList(h3("Transformed data"),plotOutput(NS(id, "plot1"), width = "100%")) })
+    output$transformed_pca2 <- renderUI({ transformed_data_pca2() })
+
+    transformed_data_pca3 <- eventReactive(input$impute2,{ tagList(h3("Imputed data"),plotOutput(NS(id, "plot2"), width = "100%")) })
+    output$transformed_pca3 <- renderUI({ transformed_data_pca3() })
+
+    transformed_data_pca4 <- eventReactive(input$normalize2,{ tagList(h3("Normalized data"),plotOutput(NS(id, "plot3"), width = "100%")) })
+    output$transformed_pca4 <- renderUI({ transformed_data_pca4() })
+
+
+    output$table1 <- renderTable(data$ms()$values[1:3,1:7], width = "100%")
+    output$table2 <- renderTable(ms1()$values[1:3,1:7], width = "100%")
+    output$table3 <- renderTable(ms2()$values[1:3,1:7], width = "100%")
+    output$table4 <- renderTable(ms3()$values[1:3,1:7], width = "100%")
+    output$plot0  <- renderPlot(plot_pca(data$ms(), color_label = c(data$batch())))
     output$plot1 <- renderPlot(plot_pca(ms1(), color_label = c(data$batch())))
     output$plot2 <- renderPlot(plot_pca(ms2(), color_label = c(data$batch())))
     output$plot3 <- renderPlot(plot_pca(ms3(), color_label = c(data$batch())))

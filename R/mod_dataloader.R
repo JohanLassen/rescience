@@ -62,27 +62,13 @@ mod_dataloader_ui <- function(id){
 
      ),
 
+    # Show tables of imported data and data ready for preprocessing
       column(
         width = 3,
         offset = 1,
         fluidRow(
           uiOutput(NS(id, "uploaded")),
-          # h3("Imported data"),
-          # tableOutput(NS(id, "table")),
           uiOutput(NS(id, "setup"))
-          # h3("Data used for modeling", width = "100%"),
-          # column(
-          #   width = 3,
-          #   offset = 0,
-          #   h5("Meta data"),
-          #   tableOutput(NS(id, "table3"))
-          #   ),
-          # column(
-          #   width = 4,
-          #   offset = 3,
-          #   h5("Values"),
-          #   tableOutput(NS(id, "table2"))
-          #   )
         )
      )
     )
