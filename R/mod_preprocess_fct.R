@@ -16,7 +16,6 @@ transform <- function(ms, method){
   msX$values[is.na(msX$values)] <- 0
 
   msX <- methods[[method]](msX)
-  print(msX)
   return(msX)
 }
 
@@ -382,12 +381,15 @@ rm_sample_min_batch_occurence <- function(ms, min_occurence = 5, batch = NULL){
 #' ms <- impute_zero(ms)
 #' ms <- rm_sample_pca_outliers(ms)
 rm_sample_pca_outliers <- function(ms, plot = FALSE) {
+  print(ms)
+
 
   raw     <- ms$values
   rowinfo <- ms$rowinfo
 
-  tmp1 <- ms$rowinfo %>% dplyr::mutate(rowid2 = row_number())
-  tmp2 <- raw[tmp1$rowid,]
+
+  tmp1 <- rowinfo %>%  tibble::rowid_to_column() %>% dplyr::mutate(rowid2 = dplyr::row_number()) #
+  tmp2 <- raw[tmp1$rowid,] %>% as.matrix()
 
   r  <- prcomp(x = tmp2, retx = T, center=T, scale. = T, rank. = 12)
 
@@ -401,11 +403,6 @@ rm_sample_pca_outliers <- function(ms, plot = FALSE) {
   tmp1 <- tmp1 %>%
     dplyr::left_join(bad_rows) %>%
     dplyr::mutate(n=ifelse(is.na(n), 0,n))
-  # %>%
-  #   dplyr::mutate(label=dplyr::case_when(
-  #     n>0 ~ rowid,
-  #     n==0 ~ "")) %>%
-  #   {.}
 
   pd <- r$x %>%
     tibble::as_tibble() %>%
@@ -416,37 +413,36 @@ rm_sample_pca_outliers <- function(ms, plot = FALSE) {
     dplyr::mutate(response = ifelse(n>0,"Outlier", "Not outlier")) %>%
     dplyr::mutate(response = factor(response))
 
-  if (plot) {
-    plotlist <- list()
+  plotlist <- list()
 
-    for(i in 1:(ncol(r$x)/2)) {
-      xvar <- names(pd)[2*i-1]
-      yvar <- names(pd)[2*i]
-      p1 <- ggplot2::ggplot(pd,ggplot2::aes(x=!!ensym(xvar), y=!!ensym(yvar),
-                          fill=response))+
-        ggplot2::geom_point(shape=21, color="#FFFFFFFF", size=3) +
-        ggplot2::scale_fill_manual(values = c("#D0D0D0", "#D04040")) +
-        ggplot2::theme(legend.position="none") +
-        NULL
+  for(i in 1:(ncol(r$x)/2)) {
+    xvar <- names(pd)[2*i-1]
+    yvar <- names(pd)[2*i]
+    p1 <- ggplot2::ggplot(pd,ggplot2::aes_string(x=xvar, y=yvar,
+                        fill="response"))+
+      ggplot2::geom_point(shape=21, color="#FFFFFFFF", size=3) +
+      ggplot2::scale_fill_manual(values = c("#D0D0D0", "#D04040")) +
+      ggplot2::theme_minimal()+
+      ggplot2::theme(legend.position="none") +
+      NULL
 
-      plotlist[[length(plotlist)+1]] <- p1
-      rm(p1)
-    }
-
-    cowplot::plot_grid(plotlist = plotlist,nrow=1)
-    rm(plotlist)
+    plotlist[[length(plotlist)+1]] <- p1
+    rm(p1)
   }
 
-  bad_rows <- tmp1 %>% dplyr::filter(n>0)
+  outlier_plot <- cowplot::plot_grid(plotlist = plotlist,nrow=1)
 
+  bad_rows <- tmp1 %>% dplyr::filter(n>0)
   if (nrow(bad_rows) > 0) {
     ms$values  <- raw[-bad_rows$rowid2,] %>% tibble::as_tibble()
     ms$rowinfo <- rowinfo[-bad_rows$rowid2,]
   }
 
-  ms$rowinfo <- ms$rowinfo %>%
-    dplyr::mutate(rowid = row_number())
 
+  ms$rowinfo <- ms$rowinfo %>%
+    dplyr::mutate(rowid = dplyr::row_number())
+
+  if (plot) return(list("ms"=ms, "outlier_plot"=outlier_plot))
   return(ms)
 }
 
@@ -514,7 +510,6 @@ rm_IS_outliers <- function(ms, standards, tolerance = 0, quantiles = c(0.025, 0.
     ggplot2::geom_point(data = good_data %>% dplyr::filter(outlier), ggplot2::aes(y=value, x=rowid), color = "gray40")+
     ggplot2::facet_wrap(~name, ncol = 1) +
     NULL
-  print(a)
 
   bad_samples <-
     good_data %>%
@@ -618,7 +613,7 @@ rm_feature_extreme_values <- function(ms) {
 #' ms <- normalize_robust_row(ms)
 normalize_robust_row <- function(ms) {
 
-  target_info   <- ms$rowinfo
+  target_info   <- ms$rowinfo %>% tibble::rowid_to_column()
   target_values <- ms$values %>% tibble::as_tibble()
 
   tmp1 <- target_info
@@ -1146,53 +1141,6 @@ make_umap <- function(tmp1, tmp2, color_label) {
   return(p)
 }
 
-
-#' probability histogram of caret model
-#'
-#' @param model the caret model trained on the ms list
-#' @import ggplot2
-#' @return ggplot2 plot
-#' @export
-#' @import ggplot2
-probs_hist <- function(model){
-  classes <- unique(model_cv_r$obs)
-  ggplot2::ggplot(data = model$pred %>% tibble::as_tibble()) +
-    ggplot2::geom_histogram(
-      breaks = seq(0,1,length.out = 100),
-      color = "gray20",
-      alpha = 0.4,
-      ggplot2::aes_string(x=as.character(classes[2]), fill="obs"),
-      position = "identity"
-    ) +
-    ggplot2::theme_minimal()+
-    ggplot2::scale_fill_manual(values = c("#d53e4f", "#3288bd"))+
-    ggplot2::labs(title = best_model)
-}
-
-
-#' ROC of caret model
-#'
-#' @param model the caret model trained on the ms list
-#' @import plotROC
-#' @import ggplot2
-#' @return ggplot2 plot
-#' @export
-plot_roc <- function(model){
-  # ROC CURVE - ALL MODELS
-  classes <- unique(model_cv_r$obs)
-  g <- ggplot2::ggplot(model$pred,
-                       ggplot2::aes_string(m=classes[1],
-                         d=factor("obs", levels = c(as.character(classes[1]), as.character(classes[2]))),
-                         color = "model")
-  ) +
-    plotROC::geom_roc(n.cuts=0) +
-    ggplot2::coord_equal() +
-    style_roc()
-
-  g +
-    annotate("text", label=paste("ROC", " =", round((calc_auc(g))$AUC, 4)))+
-    scale_color_brewer(palette = "Spectral")
-}
 
 #' Importance from caret model
 #'

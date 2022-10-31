@@ -5,14 +5,19 @@
 \title{Fit models
 Use several different model types to predict on the x and y}
 \usage{
-fit_models(x, y, methods = c("glmnet", "pls"))
+fit_models(
+  ms,
+  outcome,
+  analysis_type = "Classification",
+  methods = c("glmnet", "pls")
+)
 }
 \arguments{
+\item{methods}{machine learning models}
+
 \item{x}{value data (matrix, df, or tibble)}
 
 \item{y}{outcome variable (vector)}
-
-\item{methods}{machine learning models}
 }
 \value{
 list of caret models

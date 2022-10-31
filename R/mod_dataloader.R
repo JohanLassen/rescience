@@ -10,22 +10,30 @@
 mod_dataloader_ui <- function(id){
   ns <- NS(id)
   tagList(
-    tags$style(
-      tags$link(
-        rel = "stylesheet",
-        type = "text/css",
-        href = "styles.css"
-      )),
+    # tags$style(
+    #   tags$link(
+    #     rel = "stylesheet",
+    #     type = "text/css",
+    #     href = "styles.css"
+    #   )),
     titlePanel("Upload data"),
 
     fluidRow(
     column(
         width = 3,
         offset = 0,
-
+        #style = "background-color:#4d3a7d;",
         fileInput(
           NS(id, "upload"),
           "Upload your data file (csv or tsv)",
+          width = "100%"
+        ),
+
+        shinyWidgets::radioGroupButtons(
+          NS(id, "analysis_type"),
+          label = "Analysis type",
+          choices = c("Classification", "Regression"),
+          status = "primary",
           width = "100%"
         ),
 
@@ -58,7 +66,17 @@ mod_dataloader_ui <- function(id){
           NS(id, "end_col"), "Features' end column (select 0 for last column)", value=0, min = 0,
           width = "100%"),
 
-        actionButton(NS(id, "create"), "Select feature data!")
+        actionButton(NS(id, "create"), "Select feature data!"),
+
+        # p("The feeling of publishing overfitted data:",
+        #   br(),
+        #   br(),
+        #   "Oh baby, baby, how was I supposed to know", br(),
+        #   "That something wasn't right here?", br(),
+        #   "Oh baby, baby, I shouldn't have let you go", br(),
+        #   "And now you're out of sight, yeah", br(),
+        #   "Show me how you want it to   be", br(),
+        #   "Tell me, baby, 'cause I need to know now, oh because")
 
      ),
 
@@ -68,6 +86,8 @@ mod_dataloader_ui <- function(id){
         offset = 1,
         fluidRow(
           uiOutput(NS(id, "uploaded")),
+          br(),
+          br(),
           uiOutput(NS(id, "setup"))
         )
      )
@@ -80,20 +100,14 @@ mod_dataloader_ui <- function(id){
 #'
 #' @noRd
 #'
-#' @importFrom magrittr `%>%`
 #' @importFrom dplyr select
 mod_dataloader_server <- function(id){
-  moduleServer( id, function(input, output, session){
+  moduleServer( id, function(input, output, session) {
     ns <- session$ns
 
     # Load data
-    dataset <- eventReactive(input$upload,{
-        return(vroom::vroom(input$upload$datapath))
-        }
-    )
-    output$fileUploaded <- reactive({
-      return(!is.null(input$upload))
-    })
+    dataset <- eventReactive(input$upload, {return(vroom::vroom(input$upload$datapath))})
+    # output$fileUploaded <- reactive(!is.null(input$upload)))
 
     # Show uploaded data table
     uploaded_data <- eventReactive(input$upload,{tagList(h3("Imported data"),tableOutput(NS(id, "table")))})
@@ -139,22 +153,12 @@ mod_dataloader_server <- function(id){
 
     observe({
       f <- dataset()
-      if (!is.null(f)) updateSelectInput(session, "outcome", choices=colnames(f)[1:50])
-    })
-
-    observe({
-      f <- dataset()
-      if (!is.null(f)) updateSelectInput(session, "batch", choices=c("none", colnames(f)[1:50]))
-    })
-
-    observe({
-      f <- dataset()
-      if (!is.null(f)) updateSelectInput(session, "tech_rep", choices=c("none", colnames(f)[1:50]))
-    })
-
-    observe({
-      f <- dataset()
-      if (!is.null(f)) updateNumericInput(session, "start_col", max = ncol(f))
+      if (!is.null(f)) {
+        updateNumericInput(session, "start_col", max = ncol(f))
+        updateSelectInput(session, "tech_rep", choices=c("none", colnames(f)[1:50]))
+        updateSelectInput(session, "batch", choices=c("none", colnames(f)[1:50]))
+        updateSelectInput(session, "outcome", choices=colnames(f)[1:50])
+      }
     })
 
     observeEvent(input$upload,
@@ -183,9 +187,11 @@ mod_dataloader_server <- function(id){
       outcome = reactive(input$outcome),
       batch = reactive(input$batch),
       tech_rep = reactive(input$tech_rep),
-      ms = reactive(tidy_data())
+      ms = reactive(tidy_data()),
+      analysis_type = reactive(input$analysis_type)
     )
-  })
+  }
+  )
 }
 
 

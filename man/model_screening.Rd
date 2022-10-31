@@ -4,7 +4,7 @@
 \alias{model_screening}
 \title{Model screening}
 \usage{
-model_screening(ms, methods, outcome, tech_rep = NULL)
+model_screening(ms, methods, outcome, analysis_type, tech_rep = NULL)
 }
 \arguments{
 \item{ms}{ms list object containing value and meta data}
