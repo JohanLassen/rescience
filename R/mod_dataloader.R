@@ -137,20 +137,19 @@ mod_dataloader_server <- function(id){
 
     # Show
 
-    tidy_data <- eventReactive(
-      input$create,
-      {
-        df <- dataset()
-        start <- input$start_col
-        end   <- ifelse(input$end_col==0, ncol(df), input$end_col)
-
-        ms         <- list()
-        ms$values  <- df[,start:end]
-        ms$rowinfo <- df %>% dplyr::select(any_of(c(input$outcome, input$batch, input$tech_rep)))
-
-        ms
+    tidy_data <- eventReactive(input$create,{
+      ms <- load_ms(
+        dataset(),
+        outcome = input$outcome,
+        feature_start = input$start_col,
+        feature_end = input$end_col,
+        batch = input$batch,
+        tech_rep = input$tech_rep,
+        analysis_type = tolower(input$analysis_type))
+      return(ms)
     })
 
+    # Update user input options when data are uploaded
     observe({
       f <- dataset()
       if (!is.null(f)) {
@@ -158,16 +157,9 @@ mod_dataloader_server <- function(id){
         updateSelectInput(session, "tech_rep", choices=c("none", colnames(f)[1:50]))
         updateSelectInput(session, "batch", choices=c("none", colnames(f)[1:50]))
         updateSelectInput(session, "outcome", choices=colnames(f)[1:50])
+        updateNumericInput(session, "end_col", value = ncol(f), max = ncol(f))
       }
     })
-
-    observeEvent(input$upload,
-                 {
-                   f <- dataset()
-                   if (!is.null(f)) updateNumericInput(session, "end_col", value = ncol(f), max = ncol(f))
-                   }
-                 )
-
 
     output$table <- renderTable({
       return(dataset()[1:5, 1:10])
@@ -184,17 +176,15 @@ mod_dataloader_server <- function(id){
 
 
     list(
-      outcome = reactive(input$outcome),
-      batch = reactive(input$batch),
-      tech_rep = reactive(input$tech_rep),
-      ms = reactive(tidy_data()),
-      analysis_type = reactive(input$analysis_type)
+      # outcome = reactive(input$outcome),
+      # batch = reactive(input$batch),
+      # tech_rep = reactive(input$tech_rep),
+      ms = reactive(tidy_data())
+      #analysis_type = reactive(input$analysis_type)
     )
   }
   )
 }
-
-
 
 
 ## To be copied in the UI

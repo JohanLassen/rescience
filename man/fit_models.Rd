@@ -8,7 +8,7 @@ Use several different model types to predict on the x and y}
 fit_models(
   ms,
   outcome,
-  analysis_type = "Classification",
+  analysis_type = "classification",
   methods = c("glmnet", "pls")
 )
 }

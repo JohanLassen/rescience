@@ -82,8 +82,16 @@ mod_preprocess_server <- function(id, data){
     ms1 <- eventReactive(input$transform2, {transform(data$ms(), input$transform1)})
     ms2 <- eventReactive(input$impute2,    {impute(ms1(), input$impute1)})
     ms3 <- eventReactive(input$normalize2, {normalize(ms2(), input$normalize1)})
-    ms4 <- eventReactive(input$outlier2,    {rm_sample_pca_outliers(ms3(), plot=TRUE)})
+    ms4 <- eventReactive(input$outlier2,   {rm_sample_pca_outliers(ms3(), plot=TRUE)})
 
+    # Let the user continue to ML without completing all steps (e.g., if the data are preprocessed beforehand)
+    ms <- reactive({
+      if (isTruthy(ms4())) return(ms4()$ms)
+      if (isTruthy(ms3())) return(ms3())
+      if (isTruthy(ms2())) return(ms2())
+      if (isTruthy(ms1())) return(ms1())
+      return(data$ms())
+    })
 
     ### Making tables ###
     transformed_data_table2 <- eventReactive(input$transform2,{ tagList(h3("Transformed data"),tableOutput(NS(id, "table2"))) })
@@ -124,17 +132,17 @@ mod_preprocess_server <- function(id, data){
     output$table4 <- renderTable(ms3()$values[1:3,1:7], width = "100%")
 
     # PCA raw data
-    output$plot0  <- renderPlot(plot_pca(data$ms(), color_label = c(data$batch())))
-    output$plot1 <- renderPlot(plot_pca(ms1(), color_label = c(data$batch())))
-    output$plot2 <- renderPlot(plot_pca(ms2(), color_label = c(data$batch())))
-    output$plot3 <- renderPlot(plot_pca(ms3(), color_label = c(data$batch())))
+    output$plot0  <- renderPlot(plot_pca(data$ms(), color_label = c(data$ms()$info$batch))) #data$batch()
+    output$plot1 <- renderPlot(plot_pca(ms1(), color_label = c(data$ms()$info$batch)))
+    output$plot2 <- renderPlot(plot_pca(ms2(), color_label = c(data$ms()$info$batch)))
+    output$plot3 <- renderPlot(plot_pca(ms3(), color_label = c(data$ms()$info$batch)))
 
-    # PCA outliers
+    # PCA outliers --> see making outlier plot
     output$outliers <- renderPlot(ms4()$outlier_plot)
 
     ### Return preprocessed ms object ###
-    list(
-      ms =  reactive({ms4()$ms}) # TO DO: MAKE MORE FLEXIBLE to let user do ML on raw data.´
+    return(
+      list(ms =  reactive({ms()}))
     )
   })
 }

@@ -8,8 +8,10 @@ load_ms(
   df,
   outcome,
   feature_start,
+  analysis_type = "classification",
   feature_end = NULL,
   type = NULL,
+  batch = NULL,
   tech_rep = NULL,
   covariates = NULL
 )
@@ -20,6 +22,8 @@ load_ms(
 \item{outcome}{The outcome}
 
 \item{feature_start}{The first column containing feature/compound values. This function assumes that no metadata columns are between this colum and the final column of feature values}
+
+\item{analysis_type}{assign the ML task (regression or classification)}
 
 \item{feature_end}{The final column containing features. Default is last column in df}
 
@@ -36,6 +40,6 @@ an ms list
 Convert data frame to ms list object
 }
 \examples{
-df <- pneumonia
+library(rescience)
 ms <- load_ms(pneumonia, outcome = "group", feature_start = 8)
 }

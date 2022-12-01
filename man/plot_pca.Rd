@@ -19,10 +19,10 @@ PCA plot (beta)
 }
 \examples{
 # First convert the pneumonia object to a tibble.
-pneumonia<- tibble::tibble(pneumonia)
+pneumonia <- pneumonia
 
 # Generate list object
-ms <- list()
+ms <- load_ms(pneumonia, outcome = "group", feature_start = 8)
 
 # Assign feature values to ms$values
 start_column <- 8 # The first column with feature values
@@ -30,7 +30,7 @@ end_column <- ncol(pneumonia) # The last column of the dataset
 ms$values <- pneumonia[1:100, start_column:end_column]
 
 # Assign metadata to ms$rowinfo
-ms$rowinfo <- pneumonia[1:100,] \%>\% dplyr::select(rowid = id, group, age, gender)
+ms$rowinfo <- pneumonia[1:100,]
 ms <- impute_zero(ms)
 plot_pca(ms, color_label = "rowid")
 

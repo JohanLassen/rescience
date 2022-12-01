@@ -33,7 +33,7 @@ end_column <- ncol(pneumonia) # The last column of the dataset
 ms$values <- pneumonia[1:10, start_column:end_column]
 
 # Assign metadata to ms$rowinfo
-ms$rowinfo <- pneumonia[1:10,] \%>\% dplyr::select(rowid = id, group, age, gender)
+ms$rowinfo <- pneumonia[1:10,] \%>\% dplyr::select(id, group, age, gender)
 ms <- impute_zero(ms)
 plot_standards(ms, standards = c("M363T419","M512T603","M364T419","M365T392", "M143T177"))
 }

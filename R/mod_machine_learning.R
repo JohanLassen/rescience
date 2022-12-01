@@ -60,8 +60,8 @@ mod_machine_learning_server <- function(id, preprocessed, data){
     models <- eventReactive(
       input$model2,
       {
-        model_screening(ms = preprocessed$ms(), outcome = data$outcome(), analysis_type = data$analysis_type(), methods = input$model1)
-        #model_screening(ms = dev_data(), outcome = "group", analysis_type = "Classification", methods = input$model1)
+        model_screening(ms = preprocessed$ms(), methods = input$model1) #, outcome = data$outcome(), analysis_type = data$analysis_type()
+        #model_screening(ms = dev_data(), methods = input$model1)
 
       })
 

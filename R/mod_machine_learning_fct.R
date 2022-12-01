@@ -10,13 +10,13 @@
 #' @return list of caret models
 #'
 model_screening <-
-  function(ms, methods, outcome, analysis_type, tech_rep = NULL){
+  function(ms, methods){
     models <- list("Elastic Net" = "glmnet", "Random Forest(RF)"="ranger", "Gradient Boosting(GB)"="xgbTree", "PLS(-DA)" = "pls", "SVM"="svm")
     for (i in 1:length(methods)){
       methods[i] <- models[[methods[i]]]
     }
-
-    fits <- fit_models(ms=ms, outcome=outcome,  methods=methods, analysis_type=analysis_type)
+    print(head(ms$values))
+    fits <- fit_models(ms=ms, methods = methods)
     return(fits)
   }
 
@@ -51,11 +51,14 @@ mcc <-
 #' @import caret glmnet ranger
 #' @return list of caret models
 #' @export
-fit_models <- function(ms, outcome, analysis_type="Classification", methods = c("glmnet", "pls")){
+fit_models <- function(ms, outcome, analysis_type="classification", methods = c("glmnet", "pls")){
+
+  outcome <- ms$info$outcome
+  analysis_type = ms$info$analysis_type
 
   x <- as.matrix(ms$values)
   y <- ms$rowinfo[[outcome]]
-  if (analysis_type=="Classification") {
+  if (analysis_type=="classification") {
     y <- as.factor(y)
   } else{
     y <- as.numeric(y)
@@ -135,7 +138,6 @@ get_roc <- function(pred_object, classes){
 #'
 #' @return ROC plot and repeat-wise performance plot
 #'
-#' @import MLeval
 #' @export
 #'
 plot_roc <-
@@ -241,62 +243,3 @@ probs_hist <- function(fits){
 
   return(p)
 }
-
-
-#
-# library(tidyverse)
-# library(matlib)
-#
-# df <- readr::read_tsv("data/tx0c00448_si_002.edited.tsv")
-# X <- df %>% select(starts_with("M")) %>% map_dfc(~log10(.x+1)) %>% as.matrix() %>% scale(center = T, scale = T)
-# y <- ifelse(df$group=="control", -1, 1)
-# components <- list()
-# ps <- list()
-# qs <- c()
-# y1 = y
-# x1 = X
-# w1   <- t(x1)%*%y1 / norm(t(x1)%*%y1)
-# W <- list()
-# Q <- c()
-# P <- list()
-#
-# for (i in 1:20){ #i=1
-#
-#   tk  <- (x1%*%w1)
-#   ts <- t(tk)%*%tk
-#   tk <- tk / as.numeric(ts)
-#   pk <- t(x1)%*%tk
-#   qk <- t(y1)%*%tk
-#
-#   if (qk == 0) {break}
-#   W[[i]] <- w1
-#   P[[i]] <- pk
-#   Q[i] <- qk
-#
-#   x1 <- x1 - as.numeric(ts) * tk %*% t(pk)
-#   w1 <- w1 - t(x1)%*%y1
-# }
-#
-# W <- W %>% bind_cols %>% as.matrix
-# P <- P %>% bind_cols %>% as.matrix
-#
-#
-# B <- W%*%solve(t(P)%*%W)%*%Q
-# y_pred <- X%*%B
-# ggplot(tibble(pred = as.vector(y_pred), obs = factor(y)), aes(x=obs, y=pred))+geom_boxplot()
-#
-#
-#
-
-# df <- readr::read_tsv("data/tx0c00448_si_002.edited.tsv")
-# x <- df %>% dplyr::select(dplyr::starts_with("M")) %>% as.matrix()
-# x <- x^(1/4)
-# x <- pqn(x)
-# y <- df %>% dplyr::pull(group)
-#
-#
-# fits <-
-#   fit_models(x, y)
-#
-# performance_plot <-
-#   plot_performance(fits)

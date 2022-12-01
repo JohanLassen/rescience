@@ -32,7 +32,7 @@ end_column <- ncol(pneumonia) # The last column of the dataset
 ms$values <- pneumonia[1:100, start_column:end_column]
 
 # Assign metadata to ms$rowinfo
-ms$rowinfo <- pneumonia[1:100,] \%>\% dplyr::select(rowid = id, group, age, gender)
+ms$rowinfo <- pneumonia[1:100,] \%>\% dplyr::select(id, group, age, gender)
 ms <- impute_zero(ms)
 tmp1 <- ms$rowinfo
 tmp2 <- ms$values
